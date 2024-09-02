@@ -41,7 +41,8 @@ public static void main(String[] args){
 
 - `debug`라는 패키지에 `Debug.java, CoordinateDebugger.java` 파일을 넣어주세요.
 - inputfile을 사용하려면 프로젝트 최상단 폴더에 input.txt파일을 만들고 사용하면됩니다.
-  ![[Pasted image 20240901125137.png]]
+![Pasted image 20240901125137](https://github.com/user-attachments/assets/f6dfe901-475f-463b-a92f-29968bb05cb1)
+
   프로젝트 예시
 
 ## printArr() 사용법
