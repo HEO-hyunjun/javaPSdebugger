@@ -1,4 +1,4 @@
-package debug;
+package javaPSdebugger;
 
 public interface CoordinateDebugger {
 	/**

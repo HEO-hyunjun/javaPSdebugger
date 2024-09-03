@@ -14,7 +14,7 @@
 
 ## 사용
 
-1. `debug.Debug` 를 import해줍니다.
+1. `javaPSdebugger.Debug` 를 import해줍니다.
 2. `Debug`클래스가 사용되기 전 먼저 `Debug.setDebug`함수를 호출해줍니다.
    - `Debug.setDebug(boolean debug, [inputSetting])`
    - `boolean debug` 디버깅모드를 끄고 켤 수 있습니다. default : false

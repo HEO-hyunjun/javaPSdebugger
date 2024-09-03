@@ -1,4 +1,4 @@
-package debug;
+package javaPSdebugger;
 
 import java.io.*;
 
