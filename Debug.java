@@ -436,6 +436,23 @@ public class Debug {
 	}
 
 	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param arr     출력할 int 2차원 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 * @param chkChar 대체할 문자
+	 */
+	public static void printArr(int[][] arr, int rowSize, int colSize, CoordinateDebugger cor, char chkChar,
+			String... startText) {
+		if (!instance.DEBUG)
+			return;
+
+		printArr(arr, rowSize, colSize, convertCoordinateToArr(cor), chkChar, Integer.MAX_VALUE, startText);
+	}
+
+	/**
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
 	 * @param arr     출력할 int 2차원 배열
@@ -450,6 +467,50 @@ public class Debug {
 		printArr(arr, convertCoordinateToArr(cor), chkChar, ignore, startText);
 	}
 
+	/**
+	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param arr     출력할 int 2차원 배열
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 * @param chkChar 대체할 문자
+	 */
+	public static void printArr(int[][] arr, CoordinateDebugger cor, char chkChar, String... startText) {
+		if (!instance.DEBUG)
+			return;
+
+		printArr(arr, convertCoordinateToArr(cor), chkChar, Integer.MAX_VALUE, startText);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param arr     출력할 int 2차원 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 * @param chkChar 대체할 문자
+	 */
+	public static void printArr(int[][] arr, int rowSize, int colSize, CoordinateDebugger[] cors, char chkChar,
+			String... startText) {
+		if (!instance.DEBUG)
+			return;
+		printArr(arr, rowSize, colSize, cors, chkChar, Integer.MAX_VALUE, startText);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param arr     출력할 int 2차원 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 * @param chkChar 대체할 문자
+	 */
+	public static void printArr(int[][] arr, CoordinateDebugger[] cors, char chkChar, String... startText) {
+		if (!instance.DEBUG)
+			return;
+		printArr(arr, cors, chkChar, Integer.MAX_VALUE, startText);
+	}
 	// *******************************************END/int[][]
 
 	// *******************************************START/int[]
@@ -984,7 +1045,7 @@ public class Debug {
 	}
 
 	private static CoordinateDebugger[] convertCoordinateToArr(CoordinateDebugger cor) {
-		CoordinateDebugger[] cors = new CoordinateImpl[1];
+		CoordinateDebugger[] cors = new CoordinateDebugger[1];
 		cors[0] = cor;
 		return cors;
 	}
