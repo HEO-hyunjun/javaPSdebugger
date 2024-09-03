@@ -39,9 +39,9 @@ public static void main(String[] args){
 
 ## 설치
 
-- `debug`라는 패키지에 `Debug.java, CoordinateDebugger.java` 파일을 넣어주세요.
+- 프로젝트 src폴더에서 `git clone https://github.com/HEO-hyunjun/javaPSdebugger.git`명령어를 입력하세요
 - inputfile을 사용하려면 프로젝트 최상단 폴더에 input.txt파일을 만들고 사용하면됩니다.
-![Pasted image 20240901125137](https://github.com/user-attachments/assets/f6dfe901-475f-463b-a92f-29968bb05cb1)
+![Pasted image 20240901125137](https://github.com/HEO-hyunjun/javaPSdebugger/blob/main/projectExampleImage.png)
 
   프로젝트 예시
 
