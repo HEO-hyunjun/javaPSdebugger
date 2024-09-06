@@ -41,7 +41,7 @@ public static void main(String[] args){
 
 - 프로젝트 src폴더에서 `git clone https://github.com/HEO-hyunjun/javaPSdebugger.git`명령어를 입력하세요
 - inputfile을 사용하려면 프로젝트 최상단 폴더에 input.txt파일을 만들고 사용하면됩니다.
-![Pasted image 20240901125137](https://github.com/HEO-hyunjun/javaPSdebugger/blob/main/projectExampleImage.png)
+![Pasted image 20240901125137](https://github.com/HEO-hyunjun/javaPSdebugger/blob/modifyClassStruct/readme/projectExampleImage.png)
 
   프로젝트 예시
 
