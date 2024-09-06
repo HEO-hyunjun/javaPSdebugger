@@ -2,6 +2,10 @@ package javaPSdebugger;
 
 import java.io.*;
 
+import javaPSdebugger.util.CoordinateDebugger;
+import javaPSdebugger.util.DebugConfigure;
+import javaPSdebugger.util.DebugPrint;
+
 class CoordinateImpl implements CoordinateDebugger {
 	int y, x;
 
@@ -21,22 +25,54 @@ class CoordinateImpl implements CoordinateDebugger {
 	}
 }
 
+/**
+ * This file was written in UTF-8 format. So, If you can't read Korean letters,
+ * change Editor encoding setting to UTF-8
+ * 
+ * @author HEO-hyunjun
+ * 
+ */
 public class Debug {
 	private static Debug instance = new Debug();
-	private String inputFile = "input.txt";
-	private boolean DEBUG = false;
 	private boolean USE_INPUT_FILE = false;
-	private boolean IGNORE_MIN_MAX_VAL = true;
-	private boolean PRINT_WITH_HR = true;
+	private final String ROOT_PATH = System.getProperty("user.dir");
+	private String DEBUG_PACKAGE_PATH;
+	private String inputFile = "input.txt";
+	private boolean PRINT = false;
 	private long timer;
-	public static char DEFAULT_IGNORE_CHAR = '&';
-	public static char DEFAULT_HR_CHAR = '*';
-	public static int DEFAULT_HR_CNT = 45;
+
+	public static DebugConfigure config = new DebugConfigure();
+	public static DebugPrint print = new DebugPrint(instance);
+	
 
 	private Debug() {
 		System.out.println("Debug 모듈이 import됐습니다.");
 		System.out.println("^.*(Debug).*");
 		System.out.println("find and replace(ctrl+F)로 위 정규식을 입력후, 공백으로 replace하여 제출해주세요");
+
+		init();
+	}
+
+	private void init() {
+		System.out.println(findFilesFrom(ROOT_PATH, "Debug.java"));
+	}
+
+	private String findFilesFrom(String dirPath, String target) {
+		File dir = new File(dirPath);
+		File files[] = dir.listFiles();
+
+		for (int i = 0; i < files.length; i++) {
+			File file = files[i];
+			if (file.isDirectory()) {
+				findFilesFrom(file.getPath(), target);
+			} else {
+				System.out.println(file.toString() + " " + file.toString().contains(target));
+				if (file.toString().contains(target)) {
+					return file.toString();
+				}
+			}
+		}
+		return null;
 	}
 
 	// **************************************************************************START/setting
@@ -46,39 +82,10 @@ public class Debug {
 	 * @param debug 디버그 모드를 활성화하려면 true, 비활성화하려면 false
 	 * @throws IOException 파일 입출력 오류가 발생할 수 있습니다.
 	 */
-	public static void setDebug(boolean debug) throws IOException {
+	public static void setDebug(boolean print) throws IOException {
 		printDebugStatus();
-		instance.DEBUG = debug;
-		if (!instance.DEBUG)
-			return;
-		setInputFile(instance.inputFile);
-	}
-
-	/**
-	 * 디버그 모드를 설정하고, 입력 파일 사용 여부를 결정합니다.
-	 *
-	 * @param debug    디버그 모드를 활성화하려면 true, 비활성화하려면 false
-	 * @param useInput 입력 파일을 사용할지 여부를 결정합니다.
-	 * @throws IOException 파일 입출력 오류가 발생할 수 있습니다.
-	 */
-	public static void setDebug(boolean debug, boolean useInput) throws IOException {
-		printDebugStatus();
-		instance.DEBUG = debug;
-		setInputFile(useInput);
-	}
-
-	/**
-	 * 디버그 모드를 설정하고, 입력 파일 사용 여부를 결정합니다.
-	 *
-	 * @param debug     디버그 모드를 활성화하려면 true, 비활성화하려면 false
-	 * @param inputFile 입력 파일을 사용할지 여부를 결정합니다.
-	 * @throws IOException 파일 입출력 오류가 발생할 수 있습니다.
-	 */
-	public static void setDebug(boolean debug, boolean useInput, String inputFile) throws IOException {
-		printDebugStatus();
-		instance.DEBUG = debug;
-		instance.USE_INPUT_FILE = useInput;
-		setInputFile(inputFile);
+		instance.PRINT = print;
+		setInputFile(instance.USE_INPUT_FILE);
 	}
 
 	/**
@@ -94,53 +101,6 @@ public class Debug {
 			System.setIn(new FileInputStream(new File(instance.inputFile)));
 	}
 
-	/**
-	 * 입력 파일 경로를 설정합니다. 설정 후, 입력 파일 사용 여부에 따라 입력 스트림을 대체합니다.
-	 *
-	 * @param inputFile 사용할 입력 파일의 경로
-	 * @throws IOException 파일 입출력 오류가 발생할 수 있습니다.
-	 */
-	public static void setInputFile(String inputFile) throws IOException {
-		instance.inputFile = inputFile;
-	}
-
-	/**
-	 * 구분선 출력을 설정합니다.
-	 * 
-	 * @param set 구분선을 사용 여부
-	 */
-	public static void setHR(boolean set) {
-		instance.PRINT_WITH_HR = set;
-	}
-
-	/**
-	 * int배열을 출력할때 MAX,MIN_VALUE를 무시하고 0을 출력 여부를 설정합니다.
-	 * 
-	 * @param set 무시 여부
-	 */
-	public static void setIgnoreMaxMin(boolean set) {
-		instance.IGNORE_MIN_MAX_VAL = set;
-	}
-
-	/**
-	 * 시간측정을 시작합니다.
-	 */
-	public static void startTimer() {
-		if (!instance.DEBUG)
-			return;
-		instance.timer = System.currentTimeMillis();
-	}
-
-	/**
-	 * startTimer() 함수부터 측정한 시간을 측정하여 출력합니다.
-	 */
-	public static void chkTimer() {
-		long chk = instance.timer - System.currentTimeMillis();
-		if (!instance.DEBUG)
-			return;
-
-		System.out.println(String.format("코드 실행시간 : %d ms | %d s", chk, chk / 1000));
-	}
 	// **************************************************************************END/start
 
 	// **************************************************************************START/printArr
@@ -149,11 +109,11 @@ public class Debug {
 	/**
 	 * int 2차원 배열을 출력합니다. 지정된 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr    출력할 int 2차원 배열
+	 * @param arr    출력할 배열
 	 * @param ignore 무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -161,7 +121,7 @@ public class Debug {
 		for (int i = 0; i < arr.length; i++) {
 			for (int j = 0; j < arr[i].length; j++) {
 				if (chkIgnore(arr[i][j], ignore))
-					System.out.printf("%c ", DEFAULT_IGNORE_CHAR);
+					System.out.printf("%c ", config.IGNORE_CHAR);
 				else
 					System.out.printf("%d ", arr[i][j]);
 			}
@@ -173,13 +133,13 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 지정된 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -187,7 +147,7 @@ public class Debug {
 		for (int i = 0; i < rowSize; i++) {
 			for (int j = 0; j < colSize; j++) {
 				if (chkIgnore(arr[i][j], ignore))
-					System.out.printf("%c ", DEFAULT_IGNORE_CHAR);
+					System.out.printf("%c ", config.IGNORE_CHAR);
 				else
 					System.out.printf("%d ", arr[i][j]);
 			}
@@ -199,16 +159,16 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, CoordinateDebugger[] cors, char chkChar,
 			int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -226,7 +186,7 @@ public class Debug {
 				if (flag)
 					System.out.printf("%c ", chkChar);
 				else if (chkIgnore(arr[i][j], ignore))
-					System.out.printf("%c ", DEFAULT_IGNORE_CHAR);
+					System.out.printf("%c ", config.IGNORE_CHAR);
 				else
 					System.out.printf("%d ", arr[i][j]);
 			}
@@ -238,13 +198,13 @@ public class Debug {
 	/**
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, CoordinateDebugger[] cors, char chkChar, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -262,7 +222,7 @@ public class Debug {
 				if (flag)
 					System.out.printf("%c ", chkChar);
 				else if (chkIgnore(arr[i][j], ignore))
-					System.out.printf("%c ", DEFAULT_IGNORE_CHAR);
+					System.out.printf("%c ", config.IGNORE_CHAR);
 				else
 					System.out.printf("%d ", arr[i][j]);
 			}
@@ -276,10 +236,10 @@ public class Debug {
 	/**
 	 * int 2차원 배열을 출력합니다. 디버그 모드가 활성화된 경우에만 배열을 출력합니다.
 	 *
-	 * @param arr 출력할 int 2차원 배열
+	 * @param arr 출력할 배열
 	 */
 	public static void printArr(int[][] arr, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 		printArr(arr, Integer.MAX_VALUE, startText);
 	}
@@ -287,12 +247,12 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 디버그 모드가 활성화된 경우에만 배열을 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, Integer.MAX_VALUE, startText);
@@ -301,16 +261,16 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param row     문자를 대체할 행 인덱스
 	 * @param col     문자를 대체할 열 인덱스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, int row, int col, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, row, col, chkChar, Integer.MAX_VALUE, startText);
@@ -319,17 +279,17 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param row     문자를 대체할 행 인덱스
 	 * @param col     문자를 대체할 열 인덱스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, int row, int col, char chkChar, int ignore,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, new CoordinateImpl(row, col), chkChar, ignore, startText);
@@ -339,14 +299,14 @@ public class Debug {
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
 	 * DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param row     문자를 대체할 행 인덱스
 	 * @param col     문자를 대체할 열 인덱스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int row, int col, char chkChar, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, new CoordinateImpl(row, col), chkChar, ignore, startText);
@@ -356,13 +316,30 @@ public class Debug {
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
 	 * DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr         출력할 int 2차원 배열
+	 * @param arr     출력할 배열
+	 * @param row     문자를 대체할 행 인덱스
+	 * @param col     문자를 대체할 열 인덱스
+	 * @param chkChar 출력을 대체할 문자
+	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
+	 */
+	public static void printArr(int[][] arr, int row, int col, char chkChar, String... startText) {
+		if (!instance.PRINT)
+			return;
+
+		printArr(arr, new CoordinateImpl(row, col), chkChar, Integer.MAX_VALUE, startText);
+	}
+
+	/**
+	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
+	 * DEFAULT_IGNORE_CHAR로 출력합니다.
+	 *
+	 * @param arr         출력할 배열
 	 * @param coordinates 대체할 문자가 담긴 int배열 [idx][row=0, col=1] 형태로만 가능합니다.
-	 * @param chkChar     대체할 문자
+	 * @param chkChar     출력을 대체할 문자
 	 * @param ignore      무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int[][] coordinates, char chkChar, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, convertIntArrToCoordinateArr(coordinates), chkChar, ignore, startText);
@@ -372,12 +349,12 @@ public class Debug {
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
 	 * DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr         출력할 int 2차원 배열
+	 * @param arr         출력할 배열
 	 * @param coordinates 대체할 문자가 담긴 int배열 [idx][row=0, col=1] 형태로만 가능합니다.
-	 * @param chkChar     대체할 문자
+	 * @param chkChar     출력을 대체할 문자
 	 */
 	public static void printArr(int[][] arr, int[][] coordinates, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, convertIntArrToCoordinateArr(coordinates), chkChar, Integer.MAX_VALUE, startText);
@@ -387,14 +364,14 @@ public class Debug {
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
 	 * DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr         출력할 int 2차원 배열
+	 * @param arr         출력할 배열
 	 * @param coordinates 대체할 문자가 담긴 int배열 [idx][row=0, col=1] 형태로만 가능합니다.
-	 * @param chkChar     대체할 문자
+	 * @param chkChar     출력을 대체할 문자
 	 * @param ignore      무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, int[][] coordinates, char chkChar, int ignore,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, convertIntArrToCoordinateArr(coordinates), chkChar, ignore, startText);
@@ -404,13 +381,13 @@ public class Debug {
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
 	 * DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr         출력할 int 2차원 배열
+	 * @param arr         출력할 배열
 	 * @param coordinates 대체할 문자가 담긴 int배열 [idx][row=0, col=1] 형태로만 가능합니다.
-	 * @param chkChar     대체할 문자
+	 * @param chkChar     출력을 대체할 문자
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, int[][] coordinates, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, convertIntArrToCoordinateArr(coordinates), chkChar, Integer.MAX_VALUE,
@@ -420,16 +397,16 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, CoordinateDebugger cor, char chkChar, int ignore,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, convertCoordinateToArr(cor), chkChar, ignore, startText);
@@ -438,15 +415,15 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, CoordinateDebugger cor, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, convertCoordinateToArr(cor), chkChar, Integer.MAX_VALUE, startText);
@@ -455,13 +432,13 @@ public class Debug {
 	/**
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[][] arr, CoordinateDebugger cor, char chkChar, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, convertCoordinateToArr(cor), chkChar, ignore, startText);
@@ -470,12 +447,12 @@ public class Debug {
 	/**
 	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(int[][] arr, CoordinateDebugger cor, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, convertCoordinateToArr(cor), chkChar, Integer.MAX_VALUE, startText);
@@ -484,15 +461,15 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(int[][] arr, int rowSize, int colSize, CoordinateDebugger[] cors, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 		printArr(arr, rowSize, colSize, cors, chkChar, Integer.MAX_VALUE, startText);
 	}
@@ -500,14 +477,14 @@ public class Debug {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cor     특정 위치 좌표가 포함된 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(int[][] arr, CoordinateDebugger[] cors, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 		printArr(arr, cors, chkChar, Integer.MAX_VALUE, startText);
 	}
@@ -517,10 +494,10 @@ public class Debug {
 	/**
 	 * int 1차원 배열을 출력합니다.
 	 *
-	 * @param arr 출력할 int 1차원 배열
+	 * @param arr 출력할 배열
 	 */
 	public static void printArr(int[] arr, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 		printArr(arr, 0, arr.length, Integer.MAX_VALUE, startText);
 	}
@@ -528,11 +505,11 @@ public class Debug {
 	/**
 	 * int 1차원 배열을 출력합니다. 배열의 값이 ignore 값과 같다면, 0으로 출력합니다.
 	 *
-	 * @param arr    출력할 int 1차원 배열
+	 * @param arr    출력할 배열
 	 * @param ignore 무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[] arr, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, 0, arr.length, ignore, startText);
@@ -541,19 +518,19 @@ public class Debug {
 	/**
 	 * int 1차원 배열의 일부분을 출력합니다.
 	 *
-	 * @param arr   출력할 int 1차원 배열
+	 * @param arr   출력할 배열
 	 * @param start 출력을 시작할 위치
 	 * @param end   출력을 종료할 위치 (exclusive)
 	 */
 	public static void printArr(int[] arr, int start, int end, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
 
 		for (int i = start; i < end; i++) {
 			if (chkIgnore(arr[i], ignore))
-				System.out.printf("%c ", DEFAULT_IGNORE_CHAR);
+				System.out.printf("%c ", config.IGNORE_CHAR);
 			else
 				System.out.printf("%d ", arr[i]);
 		}
@@ -563,13 +540,13 @@ public class Debug {
 	/**
 	 * int 1차원 배열의 일부분을 출력합니다. ignore 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr    출력할 int 1차원 배열
+	 * @param arr    출력할 배열
 	 * @param start  출력을 시작할 위치
 	 * @param end    출력을 종료할 위치 (exclusive)
 	 * @param ignore 무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[] arr, int start, int end, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, start, end, Integer.MAX_VALUE, startText);
@@ -579,7 +556,7 @@ public class Debug {
 	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다. ignore 값과 같은 경우
 	 * DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr     출력할 int 1차원 배열
+	 * @param arr     출력할 배열
 	 * @param start   출력을 시작할 위치
 	 * @param end     출력을 종료할 위치 (exclusive)
 	 * @param chkIdx  출력을 대체할 위치
@@ -588,7 +565,7 @@ public class Debug {
 	 */
 	public static void printArr(int[] arr, int start, int end, int chkIdx, char chkChar, int ignore,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -597,7 +574,7 @@ public class Debug {
 			if (i == chkIdx)
 				System.out.printf("%c ", chkChar);
 			else if (chkIgnore(arr[i], ignore))
-				System.out.printf("%c ", DEFAULT_IGNORE_CHAR);
+				System.out.printf("%c ", config.IGNORE_CHAR);
 			else
 				System.out.printf("%d ", arr[i]);
 		}
@@ -607,14 +584,14 @@ public class Debug {
 	/**
 	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 1차원 배열
+	 * @param arr     출력할 배열
 	 * @param start   출력을 시작할 위치
 	 * @param end     출력을 종료할 위치 (exclusive)
 	 * @param chkIdx  출력을 대체할 위치
 	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(int[] arr, int start, int end, int chkIdx, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, start, end, chkIdx, chkChar, Integer.MAX_VALUE, startText);
@@ -624,13 +601,13 @@ public class Debug {
 	 * int 1차원 배열의 전체 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다. ignore 값과 같은 경우
 	 * DEFAULT_IGNORE_CHAR로 출력합니다.
 	 *
-	 * @param arr     출력할 int 1차원 배열
+	 * @param arr     출력할 배열
 	 * @param chkIdx  출력을 대체할 위치
 	 * @param chkChar 출력을 대체할 문자
 	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
 	 */
 	public static void printArr(int[] arr, int chkIdx, char chkChar, int ignore, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, 0, arr.length, ignore, startText);
@@ -639,12 +616,12 @@ public class Debug {
 	/**
 	 * int 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 int 1차원 배열
+	 * @param arr     출력할 배열
 	 * @param chkIdx  출력을 대체할 위치
 	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(int[] arr, int chkIdx, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, 0, arr.length, Integer.MAX_VALUE, startText);
@@ -661,7 +638,7 @@ public class Debug {
 	 * @param colSize 출력할 열의 수
 	 */
 	public static void printArr(char[][] arr, int rowSize, int colSize, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -681,7 +658,7 @@ public class Debug {
 	 * @param arr 출력할 배열
 	 */
 	public static void printArr(char[][] arr, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -702,11 +679,11 @@ public class Debug {
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cors    특정 위치들이 담긴 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, int rowSize, int colSize, CoordinateDebugger[] cors, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -736,10 +713,10 @@ public class Debug {
 	 * 
 	 * @param arr     출력할 배열
 	 * @param cors    특정 위치들이 담긴 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, CoordinateDebugger[] cors, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -769,10 +746,10 @@ public class Debug {
 	 * 
 	 * @param arr     출력할 배열
 	 * @param cors    특정 위치가 담긴 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, CoordinateDebugger cor, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, convertCoordinateToArr(cor), chkChar, startText);
@@ -785,11 +762,11 @@ public class Debug {
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cors    특정 위치가 담긴 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, int rowSize, int colSize, CoordinateDebugger cor, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, convertCoordinateToArr(cor), chkChar, startText);
@@ -800,10 +777,10 @@ public class Debug {
 	 * 
 	 * @param arr     출력할 배열
 	 * @param cors    특정 위치들이 담긴 클래스
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, int[][] cors, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, convertIntArrToCoordinateArr(cors), chkChar, startText);
@@ -816,11 +793,11 @@ public class Debug {
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 * @param cors    특정 위치들이 담긴 배열
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, int rowSize, int colSize, int[][] cors, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, convertIntArrToCoordinateArr(cors), chkChar, startText);
@@ -832,10 +809,10 @@ public class Debug {
 	 * @param arr     출력할 배열
 	 * @param row     대체할 행
 	 * @param col     대체할 열
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, int row, int col, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, new CoordinateImpl(row, col), chkChar, startText);
@@ -849,11 +826,11 @@ public class Debug {
 	 * @param colSize 출력할 열의 수
 	 * @param row     대체할 행
 	 * @param col     대체할 열
-	 * @param chkChar 대체할 문자
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[][] arr, int rowSize, int colSize, int row, int col, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, rowSize, colSize, new CoordinateImpl(row, col), chkChar, startText);
@@ -862,13 +839,13 @@ public class Debug {
 	/**
 	 * char 1차원 배열의 일부분을 출력합니다.
 	 * 
-	 * @param arr
-	 * @param start
-	 * @param end
-	 * @param startText
+	 * @param arr   출력할 배열
+	 * @param start 출력을 시작할 위치
+	 * @param end   출력을 종료할 위치 (exclusive)
+	 * @param start 출력을 시작할 위치
 	 */
 	public static void printArr(char[] arr, int start, int end, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -882,10 +859,10 @@ public class Debug {
 	/**
 	 * char 1차원 배열의 전체를 출력합니다.
 	 *
-	 * @param arr 출력할 char 1차원 배열
+	 * @param arr 출력할 배열
 	 */
 	public static void printArr(char[] arr, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, 0, arr.length, startText);
@@ -894,14 +871,14 @@ public class Debug {
 	/**
 	 * char 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 char 1차원 배열
+	 * @param arr     출력할 배열
 	 * @param start   출력을 시작할 위치
 	 * @param end     출력을 종료할 위치 (exclusive)
 	 * @param chkIdx  출력을 대체할 위치
 	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[] arr, int start, int end, int chkIdx, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printStartText(startText);
@@ -918,12 +895,12 @@ public class Debug {
 	/**
 	 * char 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
 	 *
-	 * @param arr     출력할 char 1차원 배열
+	 * @param arr     출력할 배열
 	 * @param chkIdx  출력을 대체할 위치
 	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(char[] arr, int chkIdx, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, 0, arr.length, chkIdx, chkChar, startText);
@@ -934,10 +911,10 @@ public class Debug {
 	/**
 	 * boolean 2차원 배열을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr 출력할 boolean 2차원 배열
+	 * @param arr 출력할 배열
 	 */
 	public static void printArr(boolean[][] arr, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(convertBooleanToIntArr(arr), startText);
@@ -946,12 +923,12 @@ public class Debug {
 	/**
 	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr     출력할 boolean 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 */
 	public static void printArr(boolean[][] arr, int rowSize, int colSize, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(convertBooleanToIntArr(arr), rowSize, colSize, startText);
@@ -960,27 +937,57 @@ public class Debug {
 	/**
 	 * boolean 1차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr   출력할 boolean 1차원 배열
+	 * @param arr   출력할 배열
 	 * @param start 출력을 시작할 위치
 	 * @param end   출력을 종료할 위치 (exclusive)
 	 */
 	public static void printArr(boolean[] arr, int start, int end, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(convertBooleanToIntArr(arr), start, end, startText);
 	}
 
 	/**
+	 * boolean 1차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param arr     출력할 배열
+	 * @param chkIdx  출력을 대체할 위치
+	 * @param chkChar 출력을 대체할 문자
+	 */
+	public static void printArr(boolean[] arr, int chkIdx, char chkChar, String... startText) {
+		if (!instance.PRINT)
+			return;
+
+		printArr(convertBooleanToIntArr(arr), chkIdx, chkChar, startText);
+	}
+
+	/**
+	 * boolean 1차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param arr     출력할 배열
+	 * @param start   출력을 시작할 위치
+	 * @param end     출력을 종료할 위치 (exclusive)
+	 * @param chkIdx  출력을 대체할 위치
+	 * @param chkChar 출력을 대체할 문자
+	 */
+	public static void printArr(boolean[] arr, int start, int end, int chkIdx, char chkChar, String... startText) {
+		if (!instance.PRINT)
+			return;
+
+		printArr(convertBooleanToIntArr(arr), start, end, chkIdx, chkChar, startText);
+	}
+
+	/**
 	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr     출력할 boolean 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 */
 	public static void printArr(boolean[][] arr, int rowSize, int colSize, int row, int col, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(convertBooleanToIntArr(arr), rowSize, colSize, row, col, chkChar, startText);
@@ -989,12 +996,12 @@ public class Debug {
 	/**
 	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr     출력할 boolean 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
 	 */
 	public static void printArr(boolean[][] arr, int row, int col, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(convertBooleanToIntArr(arr), row, col, chkChar, startText);
@@ -1003,39 +1010,72 @@ public class Debug {
 	/**
 	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr     출력할 boolean 2차원 배열
+	 * @param arr     출력할 배열
 	 * @param rowSize 출력할 행의 수
 	 * @param colSize 출력할 열의 수
+	 * @param cors    출력을 대체할 위치 정보 클래스 배열
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(boolean[][] arr, int rowSize, int colSize, CoordinateDebugger[] cors, char chkChar,
 			String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(convertBooleanToIntArr(arr), rowSize, colSize, cors, chkChar, startText);
 	}
 
 	/**
-	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 * boolean 2차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr     출력할 boolean 2차원 배열
-	 * @param rowSize 출력할 행의 수
-	 * @param colSize 출력할 열의 수
+	 * @param arr     출력할 배열
+	 * @param cors    출력을 대체할 위치 정보 클래스 배열
+	 * @param chkChar 출력을 대체할 문자
 	 */
 	public static void printArr(boolean[][] arr, CoordinateDebugger[] cors, char chkChar, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(convertBooleanToIntArr(arr), cors, chkChar, startText);
 	}
 
 	/**
+	 * boolean 2차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param arr     출력할 배열
+	 * @param cors    출력을 대체할 위치 정보 배열
+	 * @param chkChar 출력을 대체할 문자
+	 */
+	public static void printArr(boolean[][] arr, int[][] cors, char chkChar, String... startText) {
+		if (!instance.PRINT)
+			return;
+
+		printArr(convertBooleanToIntArr(arr), cors, chkChar, startText);
+	}
+
+	/**
+	 * boolean 2차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param arr     출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cors    출력을 대체할 위치 정보 배열
+	 * @param chkChar 출력을 대체할 문자
+	 */
+	public static void printArr(boolean[][] arr, int rowSize, int colSize, int[][] cors, char chkChar,
+			String... startText) {
+		if (!instance.PRINT)
+			return;
+
+		printArr(convertBooleanToIntArr(arr), rowSize, colSize, cors, chkChar, startText);
+	}
+
+	/**
 	 * boolean 1차원 배열을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
-	 * @param arr 출력할 boolean 1차원 배열
+	 * @param arr 출력할 배열
 	 */
 	public static void printArr(boolean[] arr, String... startText) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		printArr(arr, 0, arr.length, startText);
@@ -1045,12 +1085,12 @@ public class Debug {
 	// *******************************************START/etc
 	private static boolean chkIgnore(int value, int ignore) {
 		if (ignore == Integer.MAX_VALUE) { // ignore값이 없는경우
-			if (instance.IGNORE_MIN_MAX_VAL)
+			if (config.IGNORE_MIN_MAX_VAL)
 				return value == Integer.MAX_VALUE || value == Integer.MIN_VALUE;
 			else
 				return false;
 		} else { // ignore값이 특정 값인경우
-			if (instance.IGNORE_MIN_MAX_VAL)
+			if (config.IGNORE_MIN_MAX_VAL)
 				return value == ignore || value == Integer.MAX_VALUE || value == Integer.MIN_VALUE;
 			else
 				return value == ignore;
@@ -1088,7 +1128,7 @@ public class Debug {
 	}
 
 	private static void printStartText(String[] text) {
-		if (instance.PRINT_WITH_HR)
+		if (config.PRINT_WITH_HR)
 			printHR();
 		for (String s : text) {
 			System.out.printf("%s ", s);
@@ -1097,15 +1137,15 @@ public class Debug {
 	}
 
 	private static void printHRforce() {
-		for (int i = 0; i < DEFAULT_HR_CNT; i++) {
-			System.out.print(DEFAULT_HR_CHAR);
+		for (int i = 0; i < config.DEFAULT_HR_CNT; i++) {
+			System.out.print(config.DEFAULT_HR_CHAR);
 		}
 		System.out.println();
 	}
 
 	private static void printDebugStatus() {
 		printHRforce();
-		System.out.println("DEBUG : " + instance.DEBUG);
+		System.out.println("DEBUG : " + instance.PRINT);
 		System.out.println("USE_INPUT_FILE : " + instance.USE_INPUT_FILE);
 		System.out.println("inputFile : " + instance.inputFile);
 		printHRforce();
@@ -1113,14 +1153,14 @@ public class Debug {
 
 	public static void getInfo() {
 		printHRforce();
-		System.out.println("DEBUG : " + instance.DEBUG);
+		System.out.println("DEBUG : " + instance.PRINT);
 		System.out.println("USE_INPUT_FILE : " + instance.USE_INPUT_FILE);
 		System.out.println("inputFile : " + instance.inputFile);
-		System.out.println("IGNORE_MIN_MAX_VAL : " + instance.IGNORE_MIN_MAX_VAL);
-		System.out.println("PRINT_WITH_HR : " + instance.PRINT_WITH_HR);
-		System.out.println("DEFAULT_HR_CHAR : " + DEFAULT_HR_CHAR);
-		System.out.println("DEFAULT_HR_CNT : " + DEFAULT_HR_CNT);
-		System.out.println("DEFAULT_IGNORE_CHAR : " + DEFAULT_IGNORE_CHAR);
+		System.out.println("IGNORE_MIN_MAX_VAL : " + config.IGNORE_MIN_MAX_VAL);
+		System.out.println("PRINT_WITH_HR : " + config.PRINT_WITH_HR);
+		System.out.println("DEFAULT_HR_CHAR : " + config.DEFAULT_HR_CHAR);
+		System.out.println("DEFAULT_HR_CNT : " + config.DEFAULT_HR_CNT);
+		System.out.println("DEFAULT_IGNORE_CHAR : " + config.IGNORE_CHAR);
 		printHRforce();
 	}
 
@@ -1138,7 +1178,7 @@ public class Debug {
 	 * @param cnt 구분선으로 출력할 문자의 갯수
 	 */
 	public static void printHR(char c, int cnt) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
 
 		for (int i = 0; i < cnt; i++) {
@@ -1153,30 +1193,51 @@ public class Debug {
 	 * @param c 구분선으로 출력할 문자
 	 */
 	public static void printHR(char c) {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
-		printHR(c, DEFAULT_HR_CNT);
+		printHR(c, config.DEFAULT_HR_CNT);
 	}
 
 	/**
 	 * 구분선을 출력합니다.
 	 */
 	public static void printHR() {
-		if (!instance.DEBUG)
+		if (!instance.PRINT)
 			return;
-		printHR(DEFAULT_HR_CHAR, DEFAULT_HR_CNT);
+		printHR(config.DEFAULT_HR_CHAR, config.DEFAULT_HR_CNT);
 	}
 
 	/**
-	 * 문자열을 출력합니다.
+	 * 객체를 출력합니다.
 	 * 
-	 * @param s 출력할 문자열
+	 * @param obj 출력할 객체
 	 */
-	public static void print(String s) {
-		if (!instance.DEBUG)
+	public static void print(Object... obj) {
+		if (!instance.PRINT)
 			return;
+		for (Object s : obj)
+			System.out.println(s.toString());
+	}
 
-		System.out.println(s);
+	/**
+	 * 시간측정을 시작합니다.
+	 */
+	public static void startTimer() {
+		if (!instance.PRINT)
+			return;
+		instance.timer = System.currentTimeMillis();
+	}
+
+	/**
+	 * startTimer() 함수부터 측정한 시간을 측정하여 출력합니다.
+	 */
+	public static void chkTimer() {
+		long chk = System.currentTimeMillis() - instance.timer;
+		if (!instance.PRINT)
+			return;
+		System.out.println();
+		Debug.printHR();
+		System.out.println(String.format("코드 실행시간 : %d ms | %f s", chk, (double) (chk / 1000)));
 	}
 	// *******************************************END/etc
 }
