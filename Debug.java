@@ -216,7 +216,7 @@ public class Debug {
 		for (int i = 0; i < rowSize; i++) {
 			for (int j = 0; j < colSize; j++) {
 				boolean flag = false;
-				for (int k = 0; k < cors.length; k++) {
+				for (int k = 0; k < cors.length && cors[k] != null; k++) {
 					CoordinateDebugger cor = cors[k];
 					if (i == cor.getRow() && j == cor.getCol()) {
 						flag = true;
@@ -252,7 +252,7 @@ public class Debug {
 		for (int i = 0; i < arr.length; i++) {
 			for (int j = 0; j < arr[i].length; j++) {
 				boolean flag = false;
-				for (int k = 0; k < cors.length; k++) {
+				for (int k = 0; k < cors.length && cors[k] != null; k++) {
 					CoordinateDebugger cor = cors[k];
 					if (i == cor.getRow() && j == cor.getCol()) {
 						flag = true;
@@ -714,7 +714,7 @@ public class Debug {
 		for (int i = 0; i < rowSize; i++) {
 			for (int j = 0; j < colSize; j++) {
 				boolean flag = false;
-				for (int k = 0; k < cors.length; k++) {
+				for (int k = 0; k < cors.length && cors[k] != null; k++) {
 					if (i == cors[k].getRow() && j == cors[k].getCol()) {
 						flag = true;
 						break;
@@ -747,7 +747,7 @@ public class Debug {
 		for (int i = 0; i < arr.length; i++) {
 			for (int j = 0; j < arr[i].length; j++) {
 				boolean flag = false;
-				for (int k = 0; k < cors.length; k++) {
+				for (int k = 0; k < cors.length && cors[k] != null; k++) {
 					if (i == cors[k].getRow() && j == cors[k].getCol()) {
 						flag = true;
 						break;
@@ -998,6 +998,35 @@ public class Debug {
 			return;
 
 		printArr(convertBooleanToIntArr(arr), row, col, chkChar, startText);
+	}
+
+	/**
+	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param arr     출력할 boolean 2차원 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 */
+	public static void printArr(boolean[][] arr, int rowSize, int colSize, CoordinateDebugger[] cors, char chkChar,
+			String... startText) {
+		if (!instance.DEBUG)
+			return;
+
+		printArr(convertBooleanToIntArr(arr), rowSize, colSize, cors, chkChar, startText);
+	}
+
+	/**
+	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param arr     출력할 boolean 2차원 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 */
+	public static void printArr(boolean[][] arr, CoordinateDebugger[] cors, char chkChar, String... startText) {
+		if (!instance.DEBUG)
+			return;
+
+		printArr(convertBooleanToIntArr(arr), cors, chkChar, startText);
 	}
 
 	/**
