@@ -48,7 +48,7 @@ public class DebugConfigure {
 
 				while ((s = br.readLine()) != null) {
 					// 1. 클래스 이름 수정
-					if (s.contains(DEBUG_CLASS)) {
+					if (s.contains(DEBUG_CLASS) && s.contains("class")) {
 						s = s.replace(DEBUG_CLASS, AUTO_SUBMIT_CLASS_NAME);
 					}
 

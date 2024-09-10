@@ -1,0 +1,135 @@
+import java.io.*;
+import java.util.StringTokenizer;
+
+
+// 사용자 정의 클래스입니다.
+// 특정 위치를 나타내는 클래스입니다.
+class PointTest {
+	int y, x;
+
+	PointTest(int y, int x) {
+		this.y = y;
+		this.x = x;
+	}
+
+	// 이 클래스에서 행을 의미하는 변수를 반환합니다.
+
+	// 이 클래스에서 열을 의미하는 변수를 반환합니다.
+}
+
+// 사용자 정의 클래스입니다.
+class Edge implements Comparable<Edge> {
+	int from, to, weight;
+
+	// 이 클래스에서 행을 의미하는 변수를 반환합니다.
+
+	// 이 클래스에서 열을 의미하는 변수를 반환합니다.
+
+	// Comparable의 메서드
+	public int compareTo(Edge o) {
+		return Integer.compare(weight, o.weight);
+	}
+}
+
+public class Main {
+	static final int SIZE = 15;
+	static StringBuilder ans = new StringBuilder();
+	static int[][] testArray = new int[SIZE][SIZE];
+
+	// 깊이우선 탐색 예제입니다.
+	static void dfs(int now, int size) {
+		for (int i = 0; i < size; i++) {
+			if (testArray[now][i] != 0) {
+				// 안적은 줄은 남아있겠죠?
+				ans.append(i).append(' ');
+				dfs(i, size);
+			}
+		}
+	}
+	
+	// 다익스트라 예제입니다.
+	static int[] dijkstra(int start, int size) {
+		int[] dist = new int[SIZE];
+		boolean[] visit = new boolean[SIZE];
+		for (int i = 0; i < size; i++) {
+			dist[i] = Integer.MAX_VALUE; // Config / IGNORE_MIN_MAX_VAL = true라면 &로 표시됩니다.
+		}
+		dist[start] = 0;
+		visit[start] = true;
+		// 1차원 배열도 출력할 수 있습니다.
+		// 마지막 배열 출력전 메세지는 여러개를 출력할 수 있습니다.
+		// 없어도 가능하고요
+
+		// boolean도 출력해줍니다.
+
+		int now = start;
+		while (true) {
+			for (int i = 0; i < size; i++) {
+				if (!visit[i] && testArray[now][i] != 0) {
+					dist[i] = Math.min(dist[i], testArray[now][i]);
+				}
+			}
+
+			int minIdx = -1;
+			int min = Integer.MAX_VALUE;
+			for (int i = 0; i < size; i++) {
+				if (!visit[i] && min > dist[i]) {
+					min = dist[i];
+					minIdx = i;
+				}
+			}
+
+			if (minIdx == -1)
+				break;
+
+			now = minIdx;
+			visit[now] = true;
+		}
+		return dist;
+	}
+
+	public static void main(String[] args) throws IOException {
+		// input.txt파일에서 읽습니다
+		// Config.ini / USE_INPUT_FILE = true, INPUT_FILE = input.txt
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
+
+		int N = Integer.parseInt(st.nextToken());
+		int start = Integer.parseInt(st.nextToken());
+
+		for (int i = 0; i < N; i++) {
+			st = new StringTokenizer(br.readLine());
+			for (int j = 0; j < N; j++) {
+				testArray[i][j] = Integer.parseInt(st.nextToken());
+			}
+		}
+
+
+		ans.append("dfs 경로 확인\n").append(start).append(' ');
+		dfs(start, N);
+		ans.append('\n');
+
+
+		ans.append("최단 거리 확인\n");
+		int[] dist = dijkstra(start, N);
+
+		for (int i = 0; i < N; i++) {
+			if (dist[i] == Integer.MAX_VALUE)
+				ans.append("INF");
+			else
+				ans.append(dist[i]);
+			ans.append(' ');
+		}
+		ans.append('\n');
+
+		System.out.println(ans);
+
+		
+		int test = 0;
+		for (int i = 0; i < 500000000; i++) {
+			test += i%15;
+		}
+		System.out.println(test);
+	}
+
+}

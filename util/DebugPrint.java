@@ -657,7 +657,7 @@ public class DebugPrint {
 					CoordinateDebugger cor = cors[k];
 					if (i == cor.getRow() && j == cor.getCol()) {
 						flag = true;
-						beforeFlag = true;
+//						beforeFlag = true;
 						break;
 					}
 				}
@@ -671,13 +671,15 @@ public class DebugPrint {
 					for (int k = 0; k < Math.max(getDigit(j), digitArr[j]) - blankModifier + 1; k++) {
 						sb.append(' ');
 					}
-				}
-				else {
+				} else {
 					for (int k = 0; k < digitArr[j] - blankModifier + 1; k++) {
 						sb.append(' ');
 					}
 				}
-				if (flag)
+//				if (flag == beforeFlag && beforeFlag == true) 
+//					sb.append(String.format("%d|", array[i][j]));
+//				else 
+					if (flag)
 					sb.append(String.format("|%d|", array[i][j]));
 				else if (chkIgnore(array[i][j]))
 					sb.append(Debug.config.IGNORE_CHAR);
