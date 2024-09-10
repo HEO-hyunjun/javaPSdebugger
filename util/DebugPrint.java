@@ -36,7 +36,7 @@ public class DebugPrint {
 			return false;
 	}
 
-	private String getColIdxString(int[][] arr, CoordinateDebugger[] coors) {
+	private String getColIdxString(int[][] arr, CoordinateDebugger[] coors, int size) {
 		if (!Debug.config.PRINT_WITH_INDEX)
 			return "";
 		StringBuilder ret = new StringBuilder();
@@ -48,6 +48,7 @@ public class DebugPrint {
 		int maxCol = 0;
 		for (int i = 0; i < arr.length; i++)
 			maxCol = Math.max(maxCol, arr[i].length);
+		size = Math.min(size, maxCol);
 
 		int[] blankCntArr = new int[maxCol + 1];
 		for (int i = 0; i < arr.length; i++) {
@@ -57,7 +58,7 @@ public class DebugPrint {
 		}
 		blankCntArr[0] -= 1;
 
-		for (int i = 0; i < maxCol; i++) {
+		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < blankCntArr[i]; j++) {
 				ret.append(' ');
 			}
@@ -633,7 +634,7 @@ public class DebugPrint {
 		StringBuilder sb = new StringBuilder();
 
 		rowSize = Math.min(rowSize, array.length);
-		System.out.print(getColIdxString(array, cors));
+		System.out.print(getColIdxString(array, cors, colSize));
 
 		int maxColSize = 0;
 		for (int i = 0; i < array.length; i++) {
@@ -666,8 +667,15 @@ public class DebugPrint {
 				if (beforeFlag != flag)
 					blankModifier++;
 
-				for (int k = 0; k < digitArr[j] - blankModifier + 1; k++) {
-					sb.append(' ');
+				if (Debug.config.PRINT_WITH_INDEX) {
+					for (int k = 0; k < Math.max(getDigit(j), digitArr[j]) - blankModifier + 1; k++) {
+						sb.append(' ');
+					}
+				}
+				else {
+					for (int k = 0; k < digitArr[j] - blankModifier + 1; k++) {
+						sb.append(' ');
+					}
 				}
 				if (flag)
 					sb.append(String.format("|%d|", array[i][j]));
@@ -789,15 +797,19 @@ public class DebugPrint {
 
 	public void simpleInfo() {
 		hrForce();
+		System.out.println("현재 클래스 : " + Debug.config.DEBUG_CLASS);
+		System.out.println("현재 파일 : " + Debug.config.DEBUG_JAVA_FILE);
 		System.out.println("PRINT : " + Debug.config.PRINT);
 		System.out.println("USE_INPUT_FILE : " + Debug.config.USE_INPUT_FILE);
 		System.out.println("INPUT_FILE : " + Debug.config.INPUT_FILE);
+		System.out.println("AUTO_WRITE_SUBMIT_CODE : " + Debug.config.AUTO_WRITE_SUBMIT_CODE);
+		System.out.println("AUTO_SUBMIT_FILE_NAME : " + Debug.config.AUTO_SUBMIT_FILE_NAME);
 		hrForce();
 	}
 
 	public void info() {
 		hrForce();
-		System.out.println("DEBUG : " + Debug.config.PRINT);
+		System.out.println("PRINT : " + Debug.config.PRINT);
 		System.out.println("USE_INPUT_FILE : " + Debug.config.USE_INPUT_FILE);
 		System.out.println("INPUT_FILE : " + Debug.config.INPUT_FILE);
 		System.out.println("IGNORE_MIN_MAX_VAL : " + Debug.config.IGNORE_MIN_MAX_VAL);

@@ -22,8 +22,6 @@ public class Debug {
 
 	private Debug() {
 		System.out.println("Debug 모듈이 import됐습니다.");
-		System.out.println("^.*(Debug).*");
-		System.out.println("find and replace(ctrl+F)로 위 정규식을 입력후, 공백으로 replace하여 제출해주세요");
 	}
 
 	/**
@@ -43,6 +41,15 @@ public class Debug {
 	 */
 	public static void start(Object nowClass) {
 		config = new DebugConfigure(nowClass);
+		if (config.AUTO_WRITE_SUBMIT_CODE) {
+			System.out.printf("자동 제출코드(%s)가 생성됐으니,\n", config.AUTO_SUBMIT_CLASS_NAME);
+			System.out.println("그 파일을 그대로 복사해서 제출해주세요.");
+		} else {
+			System.out.println("^.*(Debug).*");
+			System.out.println("find and replace(ctrl+F)로 위 정규식을 입력후,");
+			System.out.println("공백으로 변환하고 최종확인 후 제출해주세요.");
+		}
+
 		print = new DebugPrint();
 		timer = new DebugTimer();
 	}
