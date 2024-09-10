@@ -43,19 +43,75 @@ public class DebugConfigure {
 				BufferedWriter bw = new BufferedWriter(new FileWriter(submitCode));
 				BufferedReader br = new BufferedReader(new FileReader(debugFile));
 				String s;
+				boolean isCoordinateDebugger = false;
+				boolean removeGetRowGetCol = false;
+
 				while ((s = br.readLine()) != null) {
+					// 1. 클래스 이름 수정
 					if (s.contains(DEBUG_CLASS)) {
 						s = s.replace(DEBUG_CLASS, AUTO_SUBMIT_CLASS_NAME);
 					}
-					if (s.toUpperCase().contains("DEBUG")) {
-						continue;
+
+					// 2. 인터페이스 상속 확인 및 처리
+					if (s.contains("implements")) {
+						String originalLine = s;
+						s = s.substring(0, s.indexOf("implements")).trim();
+						String interfaces = originalLine
+								.substring(originalLine.indexOf("implements") + "implements".length()).trim();
+
+						// 인터페이스들 나누기
+						String[] implementedInterfaces = interfaces.replace("{", "").split(",");
+
+						List<String> remainingInterfaces = new ArrayList<>();
+						isCoordinateDebugger = false;
+						for (String iface : implementedInterfaces) {
+							iface = iface.trim();
+							if (iface.equals("CoordinateDebugger")) {
+								isCoordinateDebugger = true;
+							} else {
+								remainingInterfaces.add(iface);
+							}
+						}
+
+						// CoordinateDebugger만 상속한 경우
+						if (isCoordinateDebugger && remainingInterfaces.isEmpty()) {
+							removeGetRowGetCol = true;
+						} else {
+							// 다른 인터페이스들이 남아있는 경우, CoordinateDebugger만 삭제
+							if (!remainingInterfaces.isEmpty()) {
+								s += " implements " + String.join(", ", remainingInterfaces);
+								removeGetRowGetCol = true;
+							}
+						}
+						s += " {";
 					}
 
+					// 2-1, 2-2. getCol(), getRow(), @Override 삭제
+					if (removeGetRowGetCol) {
+						if (s.contains("@Override")) {
+							continue; // @Override 애노테이션 삭제
+						}
+						if (s.contains("getRow()") || s.contains("getCol()")) {
+							while (!(s = br.readLine()).contains("}")) {
+								// 메서드 내부 내용 스킵
+							}
+							continue; // 메서드 블록을 건너뜀
+						}
+					}
+
+					// 3. Debug 관련 라인 삭제
+					if (s.toUpperCase().contains("DEBUG")) {
+						continue; // Debug가 포함된 라인은 삭제
+					}
+
+					// 파일에 최종 라인 작성
 					bw.write(s + '\n');
 				}
+
 				bw.flush();
+				bw.close();
+				br.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
