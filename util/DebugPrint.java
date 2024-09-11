@@ -464,7 +464,8 @@ public class DebugPrint {
 		int rowMaxDigit = getDigit(rowSize - 1);
 		sb.append(getColIdxString(array, rowSize, colSize));
 		for (int i = 0; i < rowSize; i++) {
-			sb.append(getIDXFormat(rowMaxDigit, i));
+			if(Debug.config.PRINT_WITH_INDEX)
+				sb.append(getIDXFormat(rowMaxDigit, i));
 			int newColSize = Math.min(colSize, array[i].length);
 
 			for (int j = 0; j < newColSize; j++) {
@@ -655,7 +656,8 @@ public class DebugPrint {
 		int rowMaxDigit = getDigit(rowSize - 1);
 		sb.append(getColIdxString(array, rowSize, colSize));
 		for (int i = 0; i < rowSize; i++) {
-			sb.append(getIDXFormat(rowMaxDigit, i));
+			if(Debug.config.PRINT_WITH_INDEX)
+				sb.append(getIDXFormat(rowMaxDigit, i));
 			int newColSize = Math.min(colSize, array[i].length);
 
 			for (int j = 0; j < newColSize; j++) {
