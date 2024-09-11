@@ -36,84 +36,104 @@ public class DebugPrint {
 			return false;
 	}
 
-	private String getColIdxString(int[][] arr, CoordinateDebugger[] coors, int size) {
-		if (!Debug.config.PRINT_WITH_INDEX)
-			return "";
-		StringBuilder ret = new StringBuilder();
-		int frontBlank = getDigit(arr.length - 1) + 2;
-		for (int i = 0; i < frontBlank; i++)
-			ret.append(' ');
-		ret.append('[');
+	private String getFormat(int maxDigit, int object, boolean isChked) {
+		if (isChked)
+			return ">%" + maxDigit + "d<";
+		else
+			return " %" + maxDigit + "d ";
+	}
 
-		int maxCol = 0;
-		for (int i = 0; i < arr.length; i++)
-			maxCol = Math.max(maxCol, arr[i].length);
-		size = Math.min(size, maxCol);
+	private String getFormat(int maxDigit, char object, boolean isChked) {
+		if (isChked)
+			return ">%" + maxDigit + "c<";
+		else
+			return " %" + maxDigit + "c ";
+	}
 
-		int[] blankCntArr = new int[maxCol + 1];
+	private String getIDXFormat(int maxDigit, int idx) {
+		return String.format("[%" + maxDigit + "d]", idx);
+	}
+
+	private int[] getDigitArr(int[][] arr, int rowSize, int colSize) {
+		int[] digitArr = new int[colSize];
+		for (int i = 0; i < rowSize; i++) {
+			for (int j = 0; j < colSize; j++) {
+				digitArr[j] = Math.max(digitArr[j], getDigit(arr[i][j]));
+				digitArr[j] = Math.max(digitArr[j], getDigit(j));
+			}
+		}
+
+		return digitArr;
+	}
+
+	private int[] getDigitArr(char[][] arr, int rowSize, int colSize) {
+		int[] digitArr = new int[colSize];
+		for (int i = 0; i < colSize; i++) {
+			digitArr[i] = Math.max(1, getDigit(i));
+		}
+		return digitArr;
+	}
+
+	private int[] getSize(int[][] arr, int rowSize, int colSize) {
+		rowSize = Math.min(rowSize, arr.length);
+
+		int maxColSize = 0;
 		for (int i = 0; i < arr.length; i++) {
-			for (int j = 0; j < arr[i].length; j++) {
-				blankCntArr[j] = Math.max(blankCntArr[j], getDigit(Math.abs(arr[i][j])));
-			}
+			maxColSize = Math.max(maxColSize, arr[i].length);
 		}
-		blankCntArr[0] -= 1;
-
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < blankCntArr[i]; j++) {
-				ret.append(' ');
-			}
-			ret.append(i);
-		}
-		ret.append(']');
-
-		return ret.append('\n').toString();
+		colSize = Math.min(maxColSize, colSize);
+		return new int[] { rowSize, colSize };
 	}
 
-	private String getColIdxString(char[][] arr, CoordinateDebugger[] coors) {
+	private int[] getSize(char[][] arr, int rowSize, int colSize) {
+		rowSize = Math.min(rowSize, arr.length);
+
+		int maxColSize = 0;
+		for (int i = 0; i < arr.length; i++) {
+			maxColSize = Math.max(maxColSize, arr[i].length);
+		}
+		colSize = Math.min(maxColSize, colSize);
+		return new int[] { rowSize, colSize };
+	}
+
+	private String getColIdxString(int[][] arr, int rowSize, int colSize) {
 		if (!Debug.config.PRINT_WITH_INDEX)
 			return "";
 		StringBuilder ret = new StringBuilder();
-		int frontBlank = getDigit(arr.length - 1) + 2;
+		int[] size = getSize(arr, rowSize, colSize);
+		rowSize = size[0];
+		colSize = size[1];
+
+		int[] digitArr = getDigitArr(arr, rowSize, colSize);
+
+		int frontBlank = getDigit(rowSize - 1) + 2;
 		for (int i = 0; i < frontBlank; i++)
 			ret.append(' ');
-		ret.append('[');
-
-		int maxCol = 0;
-		for (int i = 0; i < arr.length; i++)
-			maxCol = Math.max(maxCol, arr[i].length);
-		ret.append(0);
-		for (int i = 1; i < maxCol; i++) {
-			ret.append(' ').append(i);
+		for (int i = 0; i < colSize; i++) {
+			ret.append(getIDXFormat(digitArr[i], i));
 		}
-		ret.append(']');
 
 		return ret.append('\n').toString();
 	}
 
-	private String getRowIdxString(int[][] arr, int row) {
+	private String getColIdxString(char[][] arr, int rowSize, int colSize) {
 		if (!Debug.config.PRINT_WITH_INDEX)
 			return "";
-		int maxDigit = getDigit(arr.length - 1);
 		StringBuilder ret = new StringBuilder();
-		ret.append('[');
-		for (int i = 0; i < maxDigit - getDigit(row); i++) {
-			ret.append(' ');
-		}
-		ret.append(row).append(']');
-		return ret.toString();
-	}
+		int[] size = getSize(arr, rowSize, colSize);
+		rowSize = size[0];
+		colSize = size[1];
 
-	private String getRowIdxString(char[][] arr, int row) {
-		if (!Debug.config.PRINT_WITH_INDEX)
-			return "";
-		int maxDigit = getDigit(arr.length - 1);
-		StringBuilder ret = new StringBuilder();
-		ret.append('[');
-		for (int i = 0; i < maxDigit - getDigit(row); i++) {
+		int[] digitArr = getDigitArr(arr, rowSize, colSize);
+
+		int frontBlank = getDigit(rowSize - 1) + 2;
+		for (int i = 0; i < frontBlank; i++)
 			ret.append(' ');
+		for (int i = 0; i < colSize; i++) {
+			ret.append(getIDXFormat(digitArr[i], i));
 		}
-		ret.append(row).append(']');
-		return ret.toString();
+
+		return ret.append('\n').toString();
 	}
 
 	private int getDigit(int n) {
@@ -434,39 +454,33 @@ public class DebugPrint {
 			return;
 
 		printStartText(startText);
-
 		StringBuilder sb = new StringBuilder();
 
-		rowSize = Math.min(rowSize, array.length);
-		sb.append(getColIdxString(array, cors));
+		int[] size = getSize(array, rowSize, colSize);
+		rowSize = size[0];
+		colSize = size[1];
+		int[] digitArr = getDigitArr(array, rowSize, colSize);
+		
+		int rowMaxDigit = getDigit(rowSize - 1);
+		sb.append(getColIdxString(array, rowSize, colSize));
 		for (int i = 0; i < rowSize; i++) {
-			sb.append(getRowIdxString(array, i));
+			sb.append(getIDXFormat(rowMaxDigit, i));
 			int newColSize = Math.min(colSize, array[i].length);
-			boolean beforeFlag = false;
+
 			for (int j = 0; j < newColSize; j++) {
 				boolean flag = false;
 				for (int k = 0; k < cors.length && cors[k] != null; k++) {
 					CoordinateDebugger cor = cors[k];
 					if (i == cor.getRow() && j == cor.getCol()) {
 						flag = true;
-						beforeFlag = true;
 						break;
 					}
 				}
-				int blankModifier = 0;
-				if (flag)
-					blankModifier++;
-				if (beforeFlag != flag)
-					blankModifier++;
 
-				for (int k = 0; k < 1 - blankModifier; k++) {
-					sb.append(' ');
-				}
-				if (flag)
-					sb.append(String.format("|%c|", array[i][j]));
+				if (chkIgnore(array[i][j]))
+					sb.append(String.format(" %c ", Debug.config.IGNORE_CHAR));
 				else
-					sb.append(array[i][j]);
-				beforeFlag = flag;
+					sb.append(String.format(getFormat(digitArr[j], array[i][j], flag), array[i][j]));
 			}
 			sb.append('\n');
 		}
@@ -633,60 +647,31 @@ public class DebugPrint {
 		printStartText(startText);
 		StringBuilder sb = new StringBuilder();
 
-		rowSize = Math.min(rowSize, array.length);
-		System.out.print(getColIdxString(array, cors, colSize));
-
-		int maxColSize = 0;
-		for (int i = 0; i < array.length; i++) {
-			maxColSize = Math.max(maxColSize, array[i].length);
-		}
-		int[] digitArr = new int[maxColSize];
-		for (int i = 0; i < array.length; i++) {
-			for (int j = 0; j < maxColSize; j++) {
-				digitArr[j] = Math.max(digitArr[j], getDigit(array[i][j]));
-			}
-		}
-
+		int[] size = getSize(array, rowSize, colSize);
+		rowSize = size[0];
+		colSize = size[1];
+		int[] digitArr = getDigitArr(array, rowSize, colSize);
+		
+		int rowMaxDigit = getDigit(rowSize - 1);
+		sb.append(getColIdxString(array, rowSize, colSize));
 		for (int i = 0; i < rowSize; i++) {
-			sb.append(getRowIdxString(array, i));
+			sb.append(getIDXFormat(rowMaxDigit, i));
 			int newColSize = Math.min(colSize, array[i].length);
-			boolean beforeFlag = false;
+
 			for (int j = 0; j < newColSize; j++) {
 				boolean flag = false;
 				for (int k = 0; k < cors.length && cors[k] != null; k++) {
 					CoordinateDebugger cor = cors[k];
 					if (i == cor.getRow() && j == cor.getCol()) {
 						flag = true;
-//						beforeFlag = true;
 						break;
 					}
 				}
-				int blankModifier = getDigit(array[i][j]);
-				if (flag)
-					blankModifier++;
-				if (beforeFlag != flag)
-					blankModifier++;
 
-				if (Debug.config.PRINT_WITH_INDEX) {
-					for (int k = 0; k < Math.max(getDigit(j), digitArr[j]) - blankModifier + 1; k++) {
-						sb.append(' ');
-					}
-				} else {
-					for (int k = 0; k < digitArr[j] - blankModifier + 1; k++) {
-						sb.append(' ');
-					}
-				}
-//				if (flag == beforeFlag && beforeFlag == true) 
-//					sb.append(String.format("%d|", array[i][j]));
-//				else 
-					if (flag)
-					sb.append(String.format("|%d|", array[i][j]));
-				else if (chkIgnore(array[i][j]))
-					sb.append(Debug.config.IGNORE_CHAR);
+				if (chkIgnore(array[i][j]))
+					sb.append(String.format(" %c ", Debug.config.IGNORE_CHAR));
 				else
-					sb.append(array[i][j]);
-
-				beforeFlag = flag;
+					sb.append(String.format(getFormat(digitArr[j], array[i][j], flag), array[i][j]));
 			}
 			sb.append('\n');
 		}

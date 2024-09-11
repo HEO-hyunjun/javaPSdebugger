@@ -29,7 +29,11 @@ public class DebugConfigure {
 
 	private void init(Object nowClass) {
 		DEBUG_PACKAGE_PATH = findFilePathFrom(ROOT_PATH, "Debug.java");
-		DEBUG_CLASS = nowClass.getClass().getName();
+		String[] classFullName = nowClass.getClass().getName().split("\\.");
+		if (classFullName.length > 1)
+			DEBUG_CLASS = classFullName[classFullName.length - 1];
+		else
+			DEBUG_CLASS = nowClass.getClass().getName();
 		loadINI();
 		writeSubmitCode();
 		setUseInputFile();
@@ -165,7 +169,8 @@ public class DebugConfigure {
 		for (int i = 0; i < files.length; i++) {
 			File file = files[i];
 			if (file.isDirectory()) {
-				ret = findFilePathFrom(file.getPath(), target);
+				String tmp = findFilePathFrom(file.getPath(), target);
+				ret = tmp == "" ? ret : tmp;
 			} else {
 				if (file.toString().contains(target)) {
 					return dir.getPath();
@@ -182,7 +187,8 @@ public class DebugConfigure {
 		for (int i = 0; i < files.length; i++) {
 			File file = files[i];
 			if (file.isDirectory()) {
-				ret = findFileFrom(file.getPath(), target);
+				String tmp = findFileFrom(file.getPath(), target);
+				ret = tmp == "" ? ret : tmp;
 			} else {
 				if (file.toString().contains(target)) {
 					return file.toString();

@@ -1,4 +1,5 @@
 package javaPSdebugger.readme;
+
 import java.io.*;
 import java.util.StringTokenizer;
 
@@ -63,7 +64,7 @@ public class example {
 		for (int i = 0; i < size; i++) {
 //			Debug.print.arr(testArray, new int[] { now, i }, "현재 보는 위치(now, i) / 좌표배열(전체)");
 //			Debug.breakPoint();
-			
+
 			if (testArray[now][i] != 0) {
 				// debug 라고만 적으면 한줄이 통째로 사라집니다.
 				// 안적은 줄은 남아있겠죠?
@@ -77,7 +78,7 @@ public class example {
 			}
 		}
 	}
-	
+
 	// 다익스트라 예제입니다.
 	static int[] dijkstra(int start, int size) {
 		int[] dist = new int[SIZE];
@@ -182,11 +183,11 @@ public class example {
 		System.out.println(ans);
 
 		Debug.timer.chk(); // Debug.timer.start부터 이 라인까지 실행시간을 측정합니다.
-		
+
 		Debug.timer.start(); // 코드의 실행시간 측정을 시작합니다.
 		int test = 0;
 		for (int i = 0; i < 500000000; i++) {
-			test += i%15;
+			test += i % 15;
 		}
 		System.out.println(test);
 		Debug.timer.chk(); // Debug.timer.start부터 이 라인까지 실행시간을 측정합니다.
