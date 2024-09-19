@@ -5,13 +5,12 @@
 
 ## 주요 기능
 
-배열출력,
-
 - print : 출력과 관련된 기능
   - arr : 배열을 출력합니다. 출력할 크기, 강조할 위치, 같이 출력할 문구를 옵션으로 넣을 수 있습니다.
   - hr : 구분선을 출력합니다.
 - config : 출력, input파일 사용 여부 등 다양한 옵션과 관련된 설정 변수들이 저장돼있습니다.
 - timer : 코드 실행시간을 측정하는 기능이 들어있습니다.
+- 제출용 코드를 자동으로 생성합니다.
 
 ## 사용
 
@@ -20,11 +19,52 @@
 3. `Debug`클래스가 사용되기 전 먼저 `Debug.start(Object)`함수를 호출해줍니다.
    매개변수로는 `main()`함수가 구동되는 클래스의 인스턴스를 넣어줍니다.
 
-readme폴더에 `example.java`파일을 확인해주세요
+readme 폴더의 [example.java](./readme/example.java) 파일을 확인해주세요.
 
 ## 설치
 
 - 프로젝트 src폴더에서 `git clone https://github.com/HEO-hyunjun/javaPSdebugger.git`명령어를 입력하세요
+
+## Config.ini 설정
+
+Config.ini 파일에는 다양한 설정 옵션들이 있습니다. 자세한 내용은 [Config.ini](./Config.ini) 파일을 참조해 주세요.
+
+- `USE_INPUT_FILE`: 입력 파일 사용 여부
+
+  - `true`: 입력 파일을 사용합니다.
+  - `false`: 콘솔에서 직접 입력을 받습니다.
+
+- `INPUT_FILE`: 사용할 입력 파일의 경로
+
+  - 예: `input.txt`
+
+- `AUTO_WRITE_SUBMIT_CODE`: 제출용 코드 자동 생성 여부
+
+  - `true`: Debug 관련 코드를 제거한 제출용 코드를 자동으로 생성합니다.
+  - `false`: 수동으로 Debug 관련 코드를 제거해야 합니다.
+
+- `AUTO_SUBMIT_CLASS_NAME`: 자동 생성된 제출용 코드의 클래스 이름
+
+  - 예: `Main`
+
+- `PRINT`: Debug.print 함수의 출력 여부
+
+  - `true`: Debug.print 함수의 출력을 활성화합니다.
+  - `false`: Debug.print 함수의 출력을 비활성화합니다.
+
+- `PRINT_WITH_HR`: 배열 출력 시 구분선 사용 여부
+
+  - `true`: 배열 출력 시 구분선을 사용합니다.
+  - `false`: 배열 출력 시 구분선을 사용하지 않습니다.
+
+- `DEFAULT_IGNORE_VALUE`: 배열 출력 시 무시할 기본값
+
+  - 예: `Integer.MAX_VALUE`
+
+- `DEFAULT_IGNORE_CHAR`: 무시된 값 대신 출력할 문자
+  - 예: `&`
+
+이러한 설정들을 통해 디버깅 환경을 사용자의 필요에 맞게 커스터마이즈할 수 있습니다.
 
 ## print.arr() 사용법
 
@@ -88,17 +128,6 @@ arr =
 0 0 0 1
 1 1 0 0
 }
-
-(단일) 가장 왼쪽 위에 존재하는 1을 *로 출력
-0 0 0 0
-0 0 * 0
-0 0 0 1
-1 1 0 0
-(복수) (0,0) 좌표와, 1을 모두 X로 출력
-X 0 0 0
-0 0 X 0
-0 0 0 X
-X X 0 0
 ```
 
 ##### 직접 좌표
@@ -106,7 +135,7 @@ X X 0 0
 - (단일) 직접좌표 :
 
 ```java
-// (단일) 가장 왼쪽 위에 존재하는 1을 *로 출력
+// (단일) 가장 왼쪽 위에 존재하는 1을 강조
 int row = -1, col = -1;
 for(int i=0; i<SIZE && row == -1; i++){
 	for(int j=0; j<SIZE && col == -1; j++){
@@ -115,14 +144,13 @@ for(int i=0; i<SIZE && row == -1; i++){
 		}
 	}
 }
-Debug.printArr(arr,row,col,'*');
-Debug.printArr(arr,1,2,'*');
+Debug.print.arr(arr,new int[]{row,col});
 ```
 
 - (복수) 배열좌표 :
 
 ```java
-// (복수) (0,0) 좌표와, 1을 모두 X로 출력
+// (복수) (0,0) 좌표와, 1을 모두 강조
 int[][] cors = new int[5][2];
 int cnt = 1;
 for(int i=0; i<SIZE && row == -1; i++){
@@ -134,15 +162,14 @@ for(int i=0; i<SIZE && row == -1; i++){
 		}
 	}
 }
-Debug.printArr(arr,cors,'X');
+Debug.print.arr(arr,cors);
 ```
 
 ##### 클래스 좌표
 
 ```java
 // 예시 클래스
-class CustomClass
-implements CoordinateDebugger{ // CoordinateDebuger를 상속받아야합니다.
+class CustomClass implements CoordinateDebugger{ // CoordinateDebuger를 상속받아야합니다.
 	int y, x;
 	public CustomClass(int y, int x){
 		this.y = y;
@@ -164,7 +191,7 @@ implements CoordinateDebugger{ // CoordinateDebuger를 상속받아야합니다.
 - (단일) 클래스 좌표 :
 
 ```java
-// (단일) 가장 왼쪽 위에 존재하는 1을 *로 출력
+// (단일) 가장 왼쪽 위에 존재하는 1을 강조
 int row = -1, col = -1;
 for(int i=0; i<SIZE && row == -1; i++){
 	for(int j=0; j<SIZE && col == -1; j++){
@@ -173,16 +200,16 @@ for(int i=0; i<SIZE && row == -1; i++){
 		}
 	}
 }
-Debug.printArr(arr, new CustomClass(row, col),'*');
+Debug.print.arr(arr, new CustomClass(row, col));
 
 CustomClass cor = new CustomClass(row, col);
-Debug.printArr(arr, cor,'*');
+Debug.print.arr(arr, cor);
 ```
 
 - (복수) 클래스 배열 좌표 :
 
 ```java
-// (복수) (0,0) 좌표와, 1을 모두 X로 출력
+// (복수) (0,0) 좌표와, 1을 모두 강조
 CustomClass[] cors = new CustomClass[5];
 cors[0] = new CustomClass(0,0);
 
@@ -194,25 +221,11 @@ for(int i=0; i<SIZE && row == -1; i++){
 		}
 	}
 }
-Debug.printArr(arr,cors,'X');
+Debug.print.arr(arr,cors);
 ```
-
-### ignore
-
-- 무시할 값을 지정합니다. 배열에 ignore과 같은 값이 있다면 배열의 값 대신 0을 출력합니다.
-- 이 매개변수는 출력할 배열의 자료형이 `int`일때만 사용할 수 있습니다.
-- 생략가능하며 생략시 `IGNORE_MIN_MAX_VAL` (default `true`) 값이 true일때, `Integer.MAX_VALUE, MIN_VALUE`가 DEFAULT_IGNORE_CHAR(default `&`)로 출력 됩니다.
-- `setIgnoreMaxMin(boolean set)`메서드로 `IGNORE_MIN_MAX`값을 설정할 수 있습니다.
 
 ### startText
 
 - 배열을 출력하기 전에 출력할 문구입니다.
 - 이 매개변수는 0개 이상 입력으로 사용될 수 있습니다.
-- 2개 이상 입력될 경우, 공백문자로 구분되어 출력됩니다.
-
-## printHR() 사용법
-
-- `printHR([char c], [int cnt])`메서드는 특정 문자로 구분선을 출력해주는 메소드입니다.
-- `char c`는 생략 가능 하며, 생략 시 `DEFUALT_HR_CHAR`(default `'*'`)이 출력됩니다.
-- `int cnt`는 생략 가능하며, 생략 시 `DEFAULT_HR_CNT`(default `45`)개의 `c`가 출력됩니다.
-- `DEFAULT_HR_~`변수들은 public이므로 직접 수정할 수 있습니다.
+- 2개 이상 입력될 경우, 한줄씩 출력됩니다.
