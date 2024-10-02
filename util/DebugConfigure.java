@@ -135,7 +135,7 @@ public class DebugConfigure {
 		try {
 			Properties p = new Properties();
 			String configFile = DEBUG_PACKAGE_PATH + File.separator + "Config.ini";
-			p.load(new FileInputStream(configFile));
+			p.load(new InputStreamReader(new FileInputStream(configFile),"utf-8"));
 
 			USE_INPUT_FILE = getProperty(p, "USE_INPUT_FILE", USE_INPUT_FILE);
 			INPUT_FILE = getProperty(p, "INPUT_FILE", INPUT_FILE);
