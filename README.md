@@ -1,7 +1,8 @@
 # Debug
 
-- 문제 풀 때마다 2차원 배열, 1차원 배열을 찍고 제출할 때 다시 지웠다가 제출하고 틀렸으면 다시 찍고 어쩔 때는 input파일 입력으로 넣었다가 파일 찾을 수 없다고 뜰 때마다 화가 나서 디버거용 클래스를 만들었습니다.
-- 제가 사용하는 디버깅 용 프린트 경우의 수는 다 구현해 놓은 것 같습니다.
+- 문제 풀 때마다 2차원 배열, 1차원 배열을 찍고 제출할 때 다시 지웠다가 제출하고 틀렸으면 다시 찍고 어쩔 때는 input파일 입력으로 넣었다가 파일 찾을 수 없다고 뜰 때마다 번거로워서 간단한 디버깅용 클래스를 만들었습니다.
+- 편하게 배열을 보기쉽게 출력할 수 있고, 설정파일만 간단하게 수정해가면서 문제풀이에 활용해보세요
+- 복잡한 설치과정 없이 자바 프로젝트 `src` 파일에 clone해서 바로 사용가능합니다.
 
 ## 주요 기능
 
@@ -13,11 +14,11 @@
 - 제출용 코드를 자동으로 생성합니다.
 
 ## 사용
-
+0. UTF-8로 IDE encoding을 바꿔주세요.
 1. `javaPSdebugger.Debug` 를 import해줍니다.
 2. `Config.ini`파일을 주석을 참고하여 알맞게 수정합니다.
-3. `Debug`클래스가 사용되기 전 먼저 `Debug.start(Object)`함수를 호출해줍니다.
-   매개변수로는 `main()`함수가 구동되는 클래스의 인스턴스를 넣어줍니다.
+3. `Debug`클래스가 사용되기 전(main()메소드 가장 첫부분에서 호출하길 권장합니다) 먼저 `Debug.start(Object)`함수를 호출해줍니다.
+   매개변수로는 `main()`함수가 구동되는 클래스의 인스턴스를 넣어줍니다. (ex 문제풀이하고있는 클래스의 이름이 `test`라면, `Debug.start(new test());`를 main문 시작부분에 작성합니다.)
 
 readme 폴더의 [example.java](./readme/example.java) 파일을 확인해주세요.
 
@@ -45,7 +46,7 @@ Config.ini 파일에는 다양한 설정 옵션들이 있습니다. 자세한 �
 
 - `AUTO_SUBMIT_CLASS_NAME`: 자동 생성된 제출용 코드의 클래스 이름
 
-  - 예: `Main`
+  - 예: `Main`, `Solution`
 
 - `PRINT`: Debug.print 함수의 출력 여부
 
@@ -66,7 +67,7 @@ Config.ini 파일에는 다양한 설정 옵션들이 있습니다. 자세한 �
 
 이러한 설정들을 통해 디버깅 환경을 사용자의 필요에 맞게 커스터마이즈할 수 있습니다.
 
-## print.arr() 사용법
+## Debug.print.arr() 사용법
 
 - `print`객체에 포함된`arr`함수는 다양한 배열과 출력방식을 지원합니다.
 - Config파일에 `PRINT_WITH_HR`값이 `true일때` 구분선으로 구분됩니다.
@@ -146,15 +147,22 @@ for(int i=0; i<SIZE && row == -1; i++){
 }
 Debug.print.arr(arr,new int[]{row,col});
 ```
-
+```
+출력
+   [0][1][2][3]
+[0] 0  0  0  0 
+[1] 0  0 >1< 0 
+[2] 0  0  0  1 
+[3] 1  1  0  0
+```
 - (복수) 배열좌표 :
 
 ```java
 // (복수) (0,0) 좌표와, 1을 모두 강조
 int[][] cors = new int[5][2];
 int cnt = 1;
-for(int i=0; i<SIZE && row == -1; i++){
-	for(int j=0; j<SIZE && col == -1; j++){
+for(int i=0; i<SIZE; i++){
+	for(int j=0; j<SIZE; j++){
 		if(arr[i][j] == 1){
 			cors[cnt][0] = i;
 			cors[cnt][1] = j;
@@ -163,6 +171,14 @@ for(int i=0; i<SIZE && row == -1; i++){
 	}
 }
 Debug.print.arr(arr,cors);
+```
+```
+출력
+   [0][1][2][3]
+[0]>0< 0  0  0 
+[1] 0  0 >1< 0 
+[2] 0  0  0 >1<
+[3]>1<>1< 0  0
 ```
 
 ##### 클래스 좌표
@@ -205,6 +221,14 @@ Debug.print.arr(arr, new CustomClass(row, col));
 CustomClass cor = new CustomClass(row, col);
 Debug.print.arr(arr, cor);
 ```
+```
+출력
+   [0][1][2][3]
+[0] 0  0  0  0 
+[1] 0  0 >1< 0 
+[2] 0  0  0  1 
+[3] 1  1  0  0 
+```
 
 - (복수) 클래스 배열 좌표 :
 
@@ -214,14 +238,23 @@ CustomClass[] cors = new CustomClass[5];
 cors[0] = new CustomClass(0,0);
 
 int cnt = 1;
-for(int i=0; i<SIZE && row == -1; i++){
-	for(int j=0; j<SIZE && col == -1; j++){
+for(int i=0; i<SIZE; i++){
+	for(int j=0; j<SIZE; j++){
 		if(arr[i][j] == 1){
 			cors[cnt++] = new CustomClass(i,j);
 		}
 	}
 }
 Debug.print.arr(arr,cors);
+```
+
+```
+출력
+   [0][1][2][3]
+[0]>0< 0  0  0 
+[1] 0  0 >1< 0 
+[2] 0  0  0 >1<
+[3]>1<>1< 0  0 
 ```
 
 ### startText
