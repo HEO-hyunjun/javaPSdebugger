@@ -31,38 +31,35 @@ readme 폴더의 [example.java](./readme/example.java) 파일을 확인해주세
 Config.ini 파일에는 다양한 설정 옵션들이 있습니다. 자세한 내용은 [Config.ini](./Config.ini) 파일을 참조해 주세요.
 
 - `USE_INPUT_FILE`: 입력 파일 사용 여부
-
   - `true`: 입력 파일을 사용합니다.
   - `false`: 콘솔에서 직접 입력을 받습니다.
 
-- `INPUT_FILE`: 사용할 입력 파일의 경로
-
+- `INPUT_FILE`: 사용할 입력 파일명
   - 예: `input.txt`
 
 - `AUTO_WRITE_SUBMIT_CODE`: 제출용 코드 자동 생성 여부
-
   - `true`: Debug 관련 코드를 제거한 제출용 코드를 자동으로 생성합니다.
-  - `false`: 수동으로 Debug 관련 코드를 제거해야 합니다.
-
-- `AUTO_SUBMIT_CLASS_NAME`: 자동 생성된 제출용 코드의 클래스 이름
-
+  - `false`: 제출용 코드를 자동생성하지 않습니다.
+    
+- `AUTO_SUBMIT_FILE_NAME` : 제출용 코드의 파일명
+  - 예: `submit.txt`
+    
+- `AUTO_SUBMIT_CLASS_NAME`: 제출용 코드의 클래스명
   - 예: `Main`, `Solution`
 
-- `PRINT`: Debug.print 함수의 출력 여부
-
+- `PRINT`: Debug.print 메서드들의 출력 여부 (Debug.timer는 이와 무관하게 출력됩니다)
   - `true`: Debug.print 함수의 출력을 활성화합니다.
   - `false`: Debug.print 함수의 출력을 비활성화합니다.
 
 - `PRINT_WITH_HR`: 배열 출력 시 구분선 사용 여부
-
   - `true`: 배열 출력 시 구분선을 사용합니다.
   - `false`: 배열 출력 시 구분선을 사용하지 않습니다.
 
-- `DEFAULT_IGNORE_VALUE`: 배열 출력 시 무시할 기본값
+- `IGNORE_MIN_MAX_VAL`: int배열을 출력할때 Integer.MAX_VALUE, MIN_VALUE를 IGNORE_CHAR로 대신 출력할지 여부
+  - `true`: Integer.MAX_VALUE, MIN_VALUE를 IGNORE_CHAR로 대신 출력합니다.
+  - `false`: Integer.MAX_VALUE, MIN_VALUE를 그대로 출력합니다.
 
-  - 예: `Integer.MAX_VALUE`
-
-- `DEFAULT_IGNORE_CHAR`: 무시된 값 대신 출력할 문자
+- `IGNORE_CHAR`: IGNORE_MIN_MAX_VAL이 true일때, Integer.MAX_VALUE, MIN_VALUE대신 출력할 문자
   - 예: `&`
 
 이러한 설정들을 통해 디버깅 환경을 사용자의 필요에 맞게 커스터마이즈할 수 있습니다.
