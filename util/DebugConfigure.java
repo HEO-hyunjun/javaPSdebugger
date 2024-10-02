@@ -49,7 +49,7 @@ public class DebugConfigure {
 				String s;
 				boolean isCoordinateDebugger = false;
 				boolean removeGetRowGetCol = false;
-
+				
 				while ((s = br.readLine()) != null) {
 					// 1. 클래스 이름 수정
 					if (s.contains(DEBUG_CLASS) && s.contains("class")) {
@@ -105,6 +105,8 @@ public class DebugConfigure {
 
 					// 3. Debug 관련 라인 삭제
 					if (s.toUpperCase().contains("DEBUG")) {
+						if(!s.contains(";"))
+							while((s = br.readLine())!= null && !s.contains(";"));
 						continue; // Debug가 포함된 라인은 삭제
 					}
 
