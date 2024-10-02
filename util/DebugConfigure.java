@@ -44,8 +44,8 @@ public class DebugConfigure {
 			try {
 				File debugFile = new File(DEBUG_JAVA_FILE);
 				File submitCode = new File(AUTO_SUBMIT_FILE_NAME);
-				BufferedWriter bw = new BufferedWriter(new FileWriter(submitCode));
-				BufferedReader br = new BufferedReader(new FileReader(debugFile));
+				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(submitCode), "utf-8"));
+				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(debugFile), "utf-8"));
 				String s;
 				boolean isCoordinateDebugger = false;
 				boolean removeGetRowGetCol = false;
