@@ -15,25 +15,25 @@
 
 ### 시작
 
-![](./readme/img/start.gif)
+<img src="./readme/img/start.gif" width="80%" height="80%">
 
 - main메서드의 첫부분에 `Debug.start(new 현재클래스())`를 호출합니다.
 
 ### 배열 출력 함수
 
-![](./readme/img/useParameter.gif)
+<img src="./readme/img/useParameter.gif" width="80%" height="80%">
 
 - `Debug.print.arr()`함수는 **`출력할 배열, [출력할 행의 수, 열의 수], [좌표], [출력전메세지]`** 순으로 입력을 넣을 수 있습니다.
   `[]`는 생략가능합니다.
 
 ### 좌표 강조하기
 
-![](./readme/img/useIntPos.gif)
+<img src="../readme/img/useIntPos.gif" width="80%" height="80%">
 
 - 특정 좌표를 강조할수도 있습니다.
 - 좌표는 `int[] {행, 열}` 혹은 `int[][] {{행1,열1}, {행2,열2} ...}`으로 넣어줍니다.
 
-![](./readme/img/useCoordinatePos.gif)
+<img src="../readme/img/useCoordinatePos.gif" width="80%" height="80%">
 
 - 특정 좌표를 강조할때 좌표 클래스를 넣을수도 있습니다.
 - 다만, `CoordinateDebugger`를 상속받고, `getRow(), getCol()`함수를 오버라이드해야합니다.
@@ -41,11 +41,11 @@
 
 ### 설정파일
 
-![](./readme/img/useConfig1.gif)
+<img src="../readme/img/useConfig1.gif" width="80%" height="80%">
 
 - `Config.ini`파일을 수정하여 원하는 방식으로 입출력을 제어할 수 있습니다.
 
-![](./readme/img/useConfig2.gif)
+<img src="../readme/img/useConfig2.gif" width="80%" height="80%">
 
 - 문제를 풀고, 코드를 제출할때 클래스명을 수정하거나 디버그에 사용했던 각종 라인들을 수정할 필요 없이, 제출용코드가 생성됩니다.
 - 자동 제출용코드 작성은 [여기](./readme/README_detail.md)를 확인해주세요

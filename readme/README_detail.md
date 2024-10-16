@@ -8,19 +8,19 @@
 
 ### 설치
 
-![](./readme/img/example_hierarchy.png)
+![](./img/example_hierarchy.png)
 
 - **프로젝트 src폴더에서** `git clone https://github.com/HEO-hyunjun/javaPSdebugger.git`명령어를 입력하세요
 
 ### 시작
 
-<img src="./readme/img/start.gif" width="80%" height="80%">
+<img src="../readme/img/start.gif" width="80%" height="80%">
 
 - main메서드의 첫부분에 `Debug.start(new 현재클래스())`를 호출합니다.
 
 ### 배열 출력 함수
 
-<img src="./readme/img/useParameter.gif" width="80%" height="80%">
+<img src="../readme/img/useParameter.gif" width="80%" height="80%">
 
 - `Debug.print.arr()`함수는 **`출력할 배열, [출력할 행의 수, 열의 수], [좌표], [출력전메세지]`** 순으로 입력을 넣을 수 있습니다.
   `[]`는 생략가능합니다.
