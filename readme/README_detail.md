@@ -99,6 +99,12 @@ readme 폴더의 [example.java](./readme/example.java) 파일을 참고해주세
   - `true`: Debug.print 함수의 출력을 활성화합니다.
   - `false`: Debug.print 함수의 출력을 비활성화합니다.
 
+- `SHOW_INFO_DETAIL` : Debug 설정 상태를 어느정도로 출력할지
+
+  - `none` : Debug 설정 상태를 출력하지 않습니다.
+  - `simple` : Debug 설정 상태를 간략하게 출력합니다.
+  - `detail` : Debug 설정 상태를 전부 출력합니다.
+
 - `PRINT_WITH_HR`: 배열 출력 시 구분선 사용 여부
 
   - `true`: 배열 출력 시 구분선을 사용합니다.

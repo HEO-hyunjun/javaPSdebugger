@@ -26,7 +26,11 @@ public class DebugPrint {
 	private final CoordinateImpl[] NONE_COOR = { new CoordinateImpl(-1, -1) };
 
 	public DebugPrint() {
-		simpleInfo();
+		hrForce();
+		if (Debug.config.SHOW_INFO_DETAIL == DebugConfigure.InfoDetail.DETAIL)
+			detailInfo();
+		else if (Debug.config.SHOW_INFO_DETAIL == DebugConfigure.InfoDetail.SIMPLE)
+			simpleInfo();
 	}
 
 	private boolean chkIgnore(int value) {
@@ -479,7 +483,8 @@ public class DebugPrint {
 				}
 
 				if (chkIgnore(array[i][j]))
-					sb.append(String.format(getFormat(digitArr[j], Debug.config.IGNORE_CHAR, flag), Debug.config.IGNORE_CHAR));
+					sb.append(String.format(getFormat(digitArr[j], Debug.config.IGNORE_CHAR, flag),
+							Debug.config.IGNORE_CHAR));
 				else
 					sb.append(String.format(getFormat(digitArr[j], array[i][j], flag), array[i][j]));
 			}
@@ -669,9 +674,10 @@ public class DebugPrint {
 						break;
 					}
 				}
-				
+
 				if (chkIgnore(array[i][j]))
-					sb.append(String.format(getFormat(digitArr[j], Debug.config.IGNORE_CHAR, flag), Debug.config.IGNORE_CHAR));
+					sb.append(String.format(getFormat(digitArr[j], Debug.config.IGNORE_CHAR, flag),
+							Debug.config.IGNORE_CHAR));
 				else
 					sb.append(String.format(getFormat(digitArr[j], array[i][j], flag), array[i][j]));
 			}
@@ -768,7 +774,11 @@ public class DebugPrint {
 		System.out.println();
 	}
 
-	private void hrForce() {
+	/**
+	 * 구분선을 설정과 상관없이 강제로 출력합니다.
+	 * 
+	 */
+	public void hrForce() {
 		for (int i = 0; i < Debug.config.DEFAULT_HR_CNT; i++) {
 			System.out.print(Debug.config.DEFAULT_HR_CHAR);
 		}
@@ -785,27 +795,51 @@ public class DebugPrint {
 	}
 
 	public void simpleInfo() {
+		System.out.println("현재 클래스 : " + Debug.config.DEBUG_CLASS);
+		System.out.println("현재 파일 : " + Debug.config.DEBUG_JAVA_FILE);
+		System.out.println("PRINT : " + Debug.config.PRINT);
+		
+		System.out.println("USE_INPUT_FILE : " + Debug.config.USE_INPUT_FILE);
+		if (Debug.config.USE_INPUT_FILE)
+			System.out.println("\tINPUT_FILE : " + Debug.config.INPUT_FILE);
+
+		System.out.println("AUTO_WRITE_SUBMIT_CODE : " + Debug.config.AUTO_WRITE_SUBMIT_CODE);
+
+		if (Debug.config.AUTO_WRITE_SUBMIT_CODE) {
+			System.out.println("\tAUTO_SUBMIT_CLASS_NAME : " + Debug.config.AUTO_SUBMIT_CLASS_NAME);
+			if (!Debug.config.AUTO_WRITE_JAVA_FILE)
+				System.out.println("\tAUTO_SUBMIT_FILE_NAME : " + Debug.config.AUTO_SUBMIT_FILE_NAME);
+		}
 		hrForce();
+	}
+
+	public void detailInfo() {		
+		System.out.println("현재 프로젝트 경로 : " + Debug.config.ROOT_PATH);
+		System.out.println("Debug.java 경로 : " + Debug.config.DEBUG_PACKAGE_PATH);
 		System.out.println("현재 클래스 : " + Debug.config.DEBUG_CLASS);
 		System.out.println("현재 파일 : " + Debug.config.DEBUG_JAVA_FILE);
 		System.out.println("PRINT : " + Debug.config.PRINT);
 		System.out.println("USE_INPUT_FILE : " + Debug.config.USE_INPUT_FILE);
-		System.out.println("INPUT_FILE : " + Debug.config.INPUT_FILE);
-		System.out.println("AUTO_WRITE_SUBMIT_CODE : " + Debug.config.AUTO_WRITE_SUBMIT_CODE);
-		System.out.println("AUTO_SUBMIT_FILE_NAME : " + Debug.config.AUTO_SUBMIT_FILE_NAME);
-		hrForce();
-	}
+		if (Debug.config.USE_INPUT_FILE)
+			System.out.println("\tINPUT_FILE : " + Debug.config.INPUT_FILE);
 
-	public void info() {
-		hrForce();
-		System.out.println("PRINT : " + Debug.config.PRINT);
-		System.out.println("USE_INPUT_FILE : " + Debug.config.USE_INPUT_FILE);
-		System.out.println("INPUT_FILE : " + Debug.config.INPUT_FILE);
+		System.out.println("AUTO_WRITE_SUBMIT_CODE : " + Debug.config.AUTO_WRITE_SUBMIT_CODE);
+
+		if (Debug.config.AUTO_WRITE_SUBMIT_CODE) {
+			System.out.println("\tAUTO_SUBMIT_CLASS_NAME : " + Debug.config.AUTO_SUBMIT_CLASS_NAME);
+			System.out.println("\tAUTO_WRITE_JAVA_FILE : " + Debug.config.AUTO_WRITE_JAVA_FILE);
+			if (!Debug.config.AUTO_WRITE_JAVA_FILE)
+				System.out.println("\tAUTO_SUBMIT_FILE_NAME : " + Debug.config.AUTO_SUBMIT_FILE_NAME);
+		}
+
 		System.out.println("IGNORE_MIN_MAX_VAL : " + Debug.config.IGNORE_MIN_MAX_VAL);
+		if (Debug.config.IGNORE_MIN_MAX_VAL)
+			System.out.println("\tIGNORE_CHAR : " + Debug.config.IGNORE_CHAR);
+
 		System.out.println("PRINT_WITH_HR : " + Debug.config.PRINT_WITH_HR);
-		System.out.println("DEFAULT_HR_CHAR : " + Debug.config.DEFAULT_HR_CHAR);
-		System.out.println("DEFAULT_HR_CNT : " + Debug.config.DEFAULT_HR_CNT);
-		System.out.println("DEFAULT_IGNORE_CHAR : " + Debug.config.IGNORE_CHAR);
+		if(Debug.config.PRINT_WITH_HR)
+			System.out.println("\tDEFAULT_HR_CHAR : " + Debug.config.DEFAULT_HR_CHAR);
+			System.out.println("\tDEFAULT_HR_CNT : " + Debug.config.DEFAULT_HR_CNT);
 		hrForce();
 	}
 

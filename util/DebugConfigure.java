@@ -4,8 +4,8 @@ import java.io.*;
 import java.util.*;
 
 public class DebugConfigure {
-	public boolean USE_INPUT_FILE = false;
 	public boolean PRINT = true;
+	public boolean USE_INPUT_FILE = false;
 
 	public boolean PRINT_WITH_HR = true;
 	public boolean IGNORE_MIN_MAX_VAL = true;
@@ -23,6 +23,12 @@ public class DebugConfigure {
 	String INPUT_FILE = "input.txt";
 	String DEBUG_CLASS;
 	String DEBUG_JAVA_FILE;
+	
+	public static enum InfoDetail{
+		NONE,SIMPLE,DETAIL
+	}
+	
+	public InfoDetail SHOW_INFO_DETAIL = InfoDetail.SIMPLE;
 
 	public DebugConfigure(Object nowClass) {
 		init(nowClass);
@@ -167,6 +173,10 @@ public class DebugConfigure {
 			AUTO_SUBMIT_FILE_NAME = ROOT_PATH + File.separator + AUTO_SUBMIT_FILE_NAME;
 
 			DEBUG_JAVA_FILE = findFileFrom(ROOT_PATH, DEBUG_CLASS + ".java");
+			
+			String infoDetail = getProperty(p,"SHOW_INFO_DETAIL","SIMPLE");
+			SHOW_INFO_DETAIL = getInfoDetail(infoDetail);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -222,6 +232,16 @@ public class DebugConfigure {
 
 	private int getProperty(Properties p, String find, int property) {
 		return p.getProperty(find) == null ? property : Integer.parseInt(p.getProperty(find).trim());
+	}
+	
+	private InfoDetail getInfoDetail(String detail) {
+		if(detail.equalsIgnoreCase("detail")) {
+			return InfoDetail.DETAIL;
+		}else if(detail.equalsIgnoreCase("simple")){
+			return InfoDetail.SIMPLE;
+		}else {
+			return InfoDetail.NONE;
+		}
 	}
 
 	private boolean getBoolean(String s) {

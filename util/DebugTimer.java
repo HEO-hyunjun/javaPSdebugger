@@ -19,7 +19,7 @@ public class DebugTimer {
 	public void chk() {
 		long chk = System.currentTimeMillis() - timer;
 		System.out.println();
-		Debug.print.hr();
+		Debug.print.hrForce();
 		System.out.println(String.format("코드 실행시간 : %d ms | %.2f s", chk, ((double) chk / 1000)));
 
 		Runtime.getRuntime().gc();
