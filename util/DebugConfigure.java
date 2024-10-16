@@ -13,6 +13,7 @@ public class DebugConfigure {
 	public char DEFAULT_HR_CHAR = '*';
 	public int DEFAULT_HR_CNT = 45;
 	public boolean AUTO_WRITE_SUBMIT_CODE = false;
+	public boolean AUTO_WRITE_JAVA_FILE = false;
 	public boolean PRINT_WITH_INDEX = true;
 	public String AUTO_SUBMIT_FILE_NAME = "submit.txt";
 	public String AUTO_SUBMIT_CLASS_NAME = "Main";
@@ -44,12 +45,13 @@ public class DebugConfigure {
 			try {
 				File debugFile = new File(DEBUG_JAVA_FILE);
 				File submitCode = new File(AUTO_SUBMIT_FILE_NAME);
-				BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(submitCode), "utf-8"));
+				BufferedWriter bw = new BufferedWriter(
+						new OutputStreamWriter(new FileOutputStream(submitCode), "utf-8"));
 				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(debugFile), "utf-8"));
 				String s;
 				boolean isCoordinateDebugger = false;
 				boolean removeGetRowGetCol = false;
-				
+
 				while ((s = br.readLine()) != null) {
 					// 1. 클래스 이름 수정
 					if (s.contains(DEBUG_CLASS) && s.contains("class")) {
@@ -96,15 +98,17 @@ public class DebugConfigure {
 							continue; // @Override 애노테이션 삭제
 						}
 						if (s.contains("getRow()") || s.contains("getCol()")) {
-							while (!(s = br.readLine()).contains("}"));
+							while (!(s = br.readLine()).contains("}"))
+								;
 							continue; // 메서드 블록을 건너뜀
 						}
 					}
 
 					// 3. Debug 관련 라인 삭제
 					if (s.toUpperCase().contains("DEBUG")) {
-						if(!s.contains(";"))
-							while((s = br.readLine())!= null && !s.contains(";"));
+						if (!s.contains(";"))
+							while ((s = br.readLine()) != null && !s.contains(";"))
+								;
 						continue; // Debug가 포함된 라인은 삭제
 					}
 
@@ -135,7 +139,7 @@ public class DebugConfigure {
 		try {
 			Properties p = new Properties();
 			String configFile = DEBUG_PACKAGE_PATH + File.separator + "Config.ini";
-			p.load(new InputStreamReader(new FileInputStream(configFile),"utf-8"));
+			p.load(new InputStreamReader(new FileInputStream(configFile), "utf-8"));
 
 			USE_INPUT_FILE = getProperty(p, "USE_INPUT_FILE", USE_INPUT_FILE);
 			INPUT_FILE = getProperty(p, "INPUT_FILE", INPUT_FILE);
@@ -152,9 +156,15 @@ public class DebugConfigure {
 			PRINT_WITH_INDEX = getProperty(p, "PRINT_WITH_INDEX", PRINT_WITH_INDEX);
 
 			AUTO_WRITE_SUBMIT_CODE = getProperty(p, "AUTO_WRITE_SUBMIT_CODE", AUTO_WRITE_SUBMIT_CODE);
-			AUTO_SUBMIT_FILE_NAME = getProperty(p, "AUTO_SUBMIT_FILE_NAME", AUTO_SUBMIT_FILE_NAME);
-			AUTO_SUBMIT_FILE_NAME = ROOT_PATH + File.separator + AUTO_SUBMIT_FILE_NAME;
+			AUTO_WRITE_JAVA_FILE = getProperty(p, "AUTO_WRITE_JAVA_FILE", AUTO_WRITE_JAVA_FILE);
+
 			AUTO_SUBMIT_CLASS_NAME = getProperty(p, "AUTO_SUBMIT_CLASS_NAME", AUTO_SUBMIT_CLASS_NAME);
+			AUTO_SUBMIT_FILE_NAME = getProperty(p, "AUTO_SUBMIT_FILE_NAME", AUTO_SUBMIT_FILE_NAME);
+			
+			if(AUTO_WRITE_JAVA_FILE)
+				AUTO_SUBMIT_FILE_NAME = AUTO_SUBMIT_CLASS_NAME+".java";
+			
+			AUTO_SUBMIT_FILE_NAME = ROOT_PATH + File.separator + AUTO_SUBMIT_FILE_NAME;
 
 			DEBUG_JAVA_FILE = findFileFrom(ROOT_PATH, DEBUG_CLASS + ".java");
 		} catch (Exception e) {
