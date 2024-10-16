@@ -8,7 +8,7 @@
 
 ### 설치
 
-![](./img/example_hierarchy.png)
+![](../readme/img/example_hierarchy.png)
 
 - **프로젝트 src폴더에서** `git clone https://github.com/HEO-hyunjun/javaPSdebugger.git`명령어를 입력하세요
 
@@ -47,9 +47,8 @@
 <img src="../readme/img/useConfig2.gif" width="80%" height="80%">
 
 - 문제를 풀고, 코드를 제출할때 클래스명을 수정하거나 디버그에 사용했던 각종 라인들을 수정할 필요 없이, 제출용코드가 생성됩니다.
-- 자동 제출용코드 작성은 [여기](./readme/README_detail.md)를 확인해주세요
 
-readme 폴더의 [example.java](./readme/example.java) 파일을 참고해주세요
+readme 폴더의 [example.java](./example.java) 파일을 참고해주세요
 
 ## 주요 기능
 
@@ -69,7 +68,7 @@ readme 폴더의 [example.java](./readme/example.java) 파일을 참고해주세
 
 ## Config.ini 설정
 
-[Config.ini](./Config.ini) 파일에는 다양한 설정 옵션들이 있습니다.
+[Config.ini](../Config.ini) 파일에는 다양한 설정 옵션들이 있습니다.
 
 - `USE_INPUT_FILE`: 입력 파일 사용 여부
 
