@@ -1,14 +1,11 @@
-package javaPSdebugger.readme;
 
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
-import javaPSdebugger.Debug;
-import javaPSdebugger.util.CoordinateDebugger;
 
-class Point implements CoordinateDebugger {
+class Point {
 	int r, c;
 
 	Point(Point p) {
@@ -21,24 +18,15 @@ class Point implements CoordinateDebugger {
 		this.c = c;
 	}
 
-	@Override
 	public String toString() {
 		return "Point [r=" + r + ", c=" + c + "]";
 	}
 
-	@Override
-	public int getRow() {
-		return r;
-	}
 
-	@Override
-	public int getCol() {
-		return c;
-	}
 
 }
 
-public class example {
+public class Main {
 	static int N, M;
 	static char[][] map;
 	static int[][] visit;
@@ -73,19 +61,14 @@ public class example {
 						visit[next.r][next.c] = cnt;
 						q.add(next);
 					}
-					Debug.print.arr(visit, new Point[] { now, next }, "now = " + now, "next = " + next);
-					Debug.breakPoint();
 				}
 			}
 			cnt++;
-			Debug.print.arr(visit, "cnt = " + cnt);
 		}
 		return;
 	}
 
 	public static void main(String[] args) throws IOException {
-		Debug.start(new example());
-		Debug.timer.start();
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		N = Integer.parseInt(st.nextToken());
@@ -94,8 +77,6 @@ public class example {
 		visit = new int[N][M];
 
 		bfs(new Point(0, 0));
-		Debug.print.arr(visit, "after bfs visit");
 		System.out.println("ans = " + getMax());
-		Debug.timer.chk();
 	}
 }
