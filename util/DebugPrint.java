@@ -460,11 +460,11 @@ public class DebugPrint {
 		rowSize = size[0];
 		colSize = size[1];
 		int[] digitArr = getDigitArr(array, rowSize, colSize);
-		
+
 		int rowMaxDigit = getDigit(rowSize - 1);
 		sb.append(getColIdxString(array, rowSize, colSize));
 		for (int i = 0; i < rowSize; i++) {
-			if(Debug.config.PRINT_WITH_INDEX)
+			if (Debug.config.PRINT_WITH_INDEX)
 				sb.append(getIDXFormat(rowMaxDigit, i));
 			int newColSize = Math.min(colSize, array[i].length);
 
@@ -479,7 +479,7 @@ public class DebugPrint {
 				}
 
 				if (chkIgnore(array[i][j]))
-					sb.append(String.format(" %c ", Debug.config.IGNORE_CHAR));
+					sb.append(String.format(getFormat(digitArr[j], Debug.config.IGNORE_CHAR, flag), Debug.config.IGNORE_CHAR));
 				else
 					sb.append(String.format(getFormat(digitArr[j], array[i][j], flag), array[i][j]));
 			}
@@ -652,11 +652,11 @@ public class DebugPrint {
 		rowSize = size[0];
 		colSize = size[1];
 		int[] digitArr = getDigitArr(array, rowSize, colSize);
-		
+
 		int rowMaxDigit = getDigit(rowSize - 1);
 		sb.append(getColIdxString(array, rowSize, colSize));
 		for (int i = 0; i < rowSize; i++) {
-			if(Debug.config.PRINT_WITH_INDEX)
+			if (Debug.config.PRINT_WITH_INDEX)
 				sb.append(getIDXFormat(rowMaxDigit, i));
 			int newColSize = Math.min(colSize, array[i].length);
 
@@ -669,9 +669,9 @@ public class DebugPrint {
 						break;
 					}
 				}
-
+				
 				if (chkIgnore(array[i][j]))
-					sb.append(String.format(" %c ", Debug.config.IGNORE_CHAR));
+					sb.append(String.format(getFormat(digitArr[j], Debug.config.IGNORE_CHAR, flag), Debug.config.IGNORE_CHAR));
 				else
 					sb.append(String.format(getFormat(digitArr[j], array[i][j], flag), array[i][j]));
 			}

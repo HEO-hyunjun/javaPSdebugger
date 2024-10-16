@@ -96,9 +96,7 @@ public class DebugConfigure {
 							continue; // @Override 애노테이션 삭제
 						}
 						if (s.contains("getRow()") || s.contains("getCol()")) {
-							while (!(s = br.readLine()).contains("}")) {
-								// 메서드 내부 내용 스킵
-							}
+							while (!(s = br.readLine()).contains("}"));
 							continue; // 메서드 블록을 건너뜀
 						}
 					}
