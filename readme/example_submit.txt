@@ -1,4 +1,6 @@
 
+// 주석을 풀어보면서 실행해보세요
+
 import java.io.*;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -22,8 +24,7 @@ class Point {
 		return "Point [r=" + r + ", c=" + c + "]";
 	}
 
-
-
+	
 }
 
 public class Main {
@@ -68,6 +69,7 @@ public class Main {
 		return;
 	}
 
+
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
@@ -77,8 +79,11 @@ public class Main {
 		visit = new int[N][M];
 
 		bfs(new Point(0, 0));
-		int rowSize = 2;
-		int colSize = 3;
+		
+		
+//		int rowSize = 2;
+//		int colSize = 3;
+		
 		System.out.println("ans = " + getMax());
 	}
 }

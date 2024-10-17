@@ -53,7 +53,7 @@ readme 폴더의 [example.java](./example.java) 파일을 참고해주세요
 ## 주요 기능
 
 - print : 출력과 관련된 기능
-  - arr : 1차원, 2차원 int,boolean, char배열을 출력합니다. 출력할 크기, 강조할 위치, 같이 출력할 문구를 옵션으로 넣을 수 있습니다.
+  - arr : 1차원, 2차원 int, boolean, char, Object배열을 출력합니다. 출력할 크기, 강조할 위치, 같이 출력할 문구를 옵션으로 넣을 수 있습니다.
   - hr : 구분선을 출력합니다.
 - config : 출력, input파일 사용 여부 등 다양한 옵션과 관련된 설정 변수들이 저장돼있습니다.
 - timer : 코드 실행시간,메모리를 측정하는 기능이 들어있습니다.
@@ -65,6 +65,12 @@ readme 폴더의 [example.java](./example.java) 파일을 참고해주세요
 - main()메소드 **가장 첫부분에서** `Debug.start(Object)`함수를 호출해줍니다.
   - 매개변수로는 `main()`함수가 구동되는 클래스의 인스턴스를 넣어줍니다.
   - ex 문제풀이 중인 클래스의 이름이 `test`라면, `Debug.start(new test());`를 main문 시작부분에 작성합니다.
+- 자동 제출 코드는
+  1.  CoordinateDebugger 상속을 제거
+  2.  Debug가 포함된 문자열을 찾으면
+      2-1. Debug가 메소드나 파라미터에 들어있다면 삭제합니다.
+      2-2. 혹은 ;가 나올때까지 삭제합니다.
+  - 따라서 **항상 완벽하게 제거가 되지 않을수 있으니** 주의바랍니다.
 
 ## Config.ini 설정
 
@@ -79,17 +85,17 @@ readme 폴더의 [example.java](./example.java) 파일을 참고해주세요
 
   - 예: `input.txt`
 
-- `AUTO_WRITE_SUBMIT_CODE`: 제출용 코드 자동 생성 여부
+- `CREATE_SUBMIT_CODE`: 제출용 코드 자동 생성 여부
   - `true`: Debug 관련 코드를 제거한 제출용 코드를 자동으로 생성합니다.
   - `false`: 제출용 코드를 자동생성하지 않습니다.
-- `AUTO_WRITE_JAVA_FILE`: 자동 제출 코드를 java파일로 생성할지 여부
+- `CREATE_JAVA_FILE`: 자동 제출 코드를 java파일로 생성할지 여부
 
-  - `true`: 제출용 코드를 자동으로 생성하되, 제출용코드의 파일명을 무시하고 `(AUTO_SUBMIT_CLASS_NAME).java`로 생성됩니다.
-  - `false`: `AUTO_SUBMIT_FILE_NAME`으로 제출용코드가 생성됩니다.
+  - `true`: 제출용 코드를 자동으로 생성하되, 제출용코드의 파일명을 무시하고 `(SUBMIT_CLASS_NAME).java`로 생성됩니다.
+  - `false`: `SUBMIT_FILE_NAME`으로 제출용코드가 생성됩니다.
 
-- `AUTO_SUBMIT_FILE_NAME` : 제출용 코드의 파일명
+- `SUBMIT_FILE_NAME` : 제출용 코드의 파일명 (`CREATE_JAVA_FILE`이 `true`라면, 무시됩니다.)
   - 예: `submit.txt`
-- `AUTO_SUBMIT_CLASS_NAME`: 제출용 코드의 클래스명
+- `SUBMIT_CLASS_NAME`: 제출용 코드의 클래스명
 
   - 예: `Main`, `Solution`
 
@@ -161,11 +167,13 @@ for(int i=start, i<end; i++)
 ### coordinate
 
 - 특정 행, 열 위치의 값을 강조하는 옵션입니다.
-- 좌표를 입력할 수 있는 방법은 총 4가지입니다.
+- 좌표를 입력할 수 있는 방법은 총 5가지입니다.
   - (단일) 직접 좌표 : `int row, int col`형태로 단 하나의 좌표를 강조합니다.
   - (단일) 클래스 좌표 : `CoordinateDebugger cor` 형태로 단 하나의 좌표를 강조합니다.
   - (복수) 배열 좌표 : `int[][] cors` 형태로 `[idx][row = 0, col = 1]`저장된 배열의 위치들을 전부 강조합니다.
   - (복수) 클래스 배열 좌표 : `CoordinateDebugger[] cors` 형태로 좌표 클래스 내부의 좌표들을 전부 강조합니다.
+  - (복수) Iterable을 상속받는 객체 : Iterable객체에 CoordinateDebugger를 상속받는 객체가 들어있는 경우, 해당 객체 내의 모든 좌표를 전부 강조합니다.
+    - ex, `CustomClass`가 `CoordinateDebugger`를 상속받는다고하면, `Queue<CustomClass> q` 형태로 파라미터에 입력으로 줄 수 있습니다.
 
 #### coordinate 사용 예시
 
@@ -297,6 +305,22 @@ for(int i=0; i<SIZE; i++){
 	for(int j=0; j<SIZE; j++){
 		if(arr[i][j] == 1){
 			cors[cnt++] = new CustomClass(i,j);
+		}
+	}
+}
+Debug.print.arr(arr,cors);
+```
+
+- (Iterable) Iterable 상속받는 객체 :
+
+```java
+List<CustomClass> cors = new List<>();
+cors.add(new CustomClass(0,0));
+
+for(int i=0; i<SIZE; i++){
+	for(int j=0; j<SIZE; j++){
+		if(arr[i][j] == 1){
+			cors.add(new CustomClass(i,j));
 		}
 	}
 }

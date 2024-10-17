@@ -42,10 +42,37 @@ public class Debug {
 	/**
 	 * Debug를 시작합니다.
 	 */
+	public static void start(Class nowClass) {
+		config = new DebugConfigure(nowClass);
+		init();
+	}
+
+	/**
+	 * Debug를 시작합니다.
+	 */
 	public static void start(Object nowClass) {
 		config = new DebugConfigure(nowClass);
-		if (config.AUTO_WRITE_SUBMIT_CODE) {
-			System.out.printf("자동 제출코드(%s)가 생성됐으니,\n", config.AUTO_SUBMIT_CLASS_NAME);
+		init();
+	}
+
+	/**
+	 * Debug를 시작합니다.
+	 */
+	public static void start(Class nowClass, DebugConfigure customConfig) {
+		config = new DebugConfigure(customConfig, nowClass);
+		init();
+	}
+
+	/**
+	 * Debug를 시작합니다.
+	 */
+	public static void start(Object nowClass, DebugConfigure customConfig) {
+		start(nowClass.getClass(), customConfig);
+	}
+
+	private static void init() {
+		if (config.CREATE_SUBMIT_CODE) {
+			System.out.printf("자동 제출코드(%s)가 생성됐으니,\n", config.SUBMIT_CLASS_NAME);
 			System.out.println("그 파일을 그대로 복사해서 제출해주세요.");
 		} else {
 			System.out.println("^.*(Debug).*");
@@ -63,11 +90,9 @@ public class Debug {
 	public static void breakPoint() {
 		System.out.print("");
 	}
-	
+
 	/**
-	 * 입력을 기다리며 멈출수 있습니다.
-	 * debug모드 사용하지 않고 사용할 수 있는 브레이크포인트입니다.
-	 * 입력이 꼬이지 않게 주의 바랍니다.
+	 * 입력을 기다리며 멈출수 있습니다. debug모드 사용하지 않고 사용할 수 있는 브레이크포인트입니다. 입력이 꼬이지 않게 주의 바랍니다.
 	 */
 	public static void stop() {
 		System.out.print("진행하려면 enter를 눌러주세요 ... ");

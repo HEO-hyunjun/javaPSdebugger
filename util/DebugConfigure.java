@@ -2,66 +2,116 @@ package javaPSdebugger.util;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class DebugConfigure {
 	public boolean PRINT = true;
 	public boolean USE_INPUT_FILE = false;
+	public String INPUT_FILE = "input.txt";
 
 	public boolean PRINT_WITH_HR = true;
 	public boolean IGNORE_MIN_MAX_VAL = true;
 	public char IGNORE_CHAR = '&';
 	public char DEFAULT_HR_CHAR = '*';
 	public int DEFAULT_HR_CNT = 45;
-	public boolean AUTO_WRITE_SUBMIT_CODE = false;
-	public boolean AUTO_WRITE_JAVA_FILE = false;
+	public boolean CREATE_SUBMIT_CODE = false;
+	public boolean CREATE_JAVA_FILE = false;
 	public boolean PRINT_WITH_INDEX = true;
-	public String AUTO_SUBMIT_FILE_NAME = "submit.txt";
-	public String AUTO_SUBMIT_CLASS_NAME = "Main";
+	public String SUBMIT_FILE_NAME = "submit.txt";
+	public String SUBMIT_CLASS_NAME = "Main";
 
-	final String ROOT_PATH = System.getProperty("user.dir");
+	static final String ROOT_PATH = System.getProperty("user.dir");
 	String DEBUG_PACKAGE_PATH;
-	String INPUT_FILE = "input.txt";
 	String DEBUG_CLASS;
 	String DEBUG_JAVA_FILE;
-	
-	public static enum InfoDetail{
-		NONE,SIMPLE,DETAIL
+
+	public static enum InfoDetail {
+		NONE, SIMPLE, DETAIL
 	}
-	
+
 	public InfoDetail SHOW_INFO_DETAIL = InfoDetail.SIMPLE;
 
-	public DebugConfigure(Object nowClass) {
-		init(nowClass);
+	public DebugConfigure() {
+		if (DEBUG_PACKAGE_PATH == null)
+			DEBUG_PACKAGE_PATH = findFilePathFrom(ROOT_PATH, "Debug.java");
+
+		loadINI();
 	}
 
-	private void init(Object nowClass) {
-		DEBUG_PACKAGE_PATH = findFilePathFrom(ROOT_PATH, "Debug.java");
-		String[] classFullName = nowClass.getClass().getName().split("\\.");
-		if (classFullName.length > 1)
-			DEBUG_CLASS = classFullName[classFullName.length - 1];
-		else
-			DEBUG_CLASS = nowClass.getClass().getName();
+	public DebugConfigure(DebugConfigure customConfig, Class nowClass) {
+		this.PRINT = customConfig.PRINT;
+		this.USE_INPUT_FILE = customConfig.USE_INPUT_FILE;
+		this.PRINT_WITH_HR = customConfig.PRINT_WITH_HR;
+		this.IGNORE_MIN_MAX_VAL = customConfig.IGNORE_MIN_MAX_VAL;
+		this.IGNORE_CHAR = customConfig.IGNORE_CHAR;
+		this.DEFAULT_HR_CHAR = customConfig.DEFAULT_HR_CHAR;
+		this.DEFAULT_HR_CNT = customConfig.DEFAULT_HR_CNT;
+		this.CREATE_SUBMIT_CODE = customConfig.CREATE_SUBMIT_CODE;
+		this.CREATE_JAVA_FILE = customConfig.CREATE_JAVA_FILE;
+		this.PRINT_WITH_INDEX = customConfig.PRINT_WITH_INDEX;
+		this.SUBMIT_FILE_NAME = customConfig.SUBMIT_FILE_NAME;
+		this.SUBMIT_CLASS_NAME = customConfig.SUBMIT_CLASS_NAME;
+		this.INPUT_FILE = customConfig.INPUT_FILE;
+		init(nowClass);
+		writeSubmitCode();
+		setUseInputFile();
+	}
+
+	public DebugConfigure(Object nowClass) {
+		init(nowClass.getClass());
 		loadINI();
 		writeSubmitCode();
 		setUseInputFile();
 	}
 
+	public DebugConfigure(Class nowClass) {
+		init(nowClass);
+		loadINI();
+		writeSubmitCode();
+		setUseInputFile();
+	}
+
+	private void init(Class nowClass) {
+		if (DEBUG_PACKAGE_PATH == null)
+			DEBUG_PACKAGE_PATH = findFilePathFrom(ROOT_PATH, "Debug.java");
+
+		String[] classFullName = nowClass.getName().split("\\.");
+		if (classFullName.length > 1)
+			DEBUG_CLASS = classFullName[classFullName.length - 1];
+		else
+			DEBUG_CLASS = nowClass.getTypeName();
+
+		DEBUG_JAVA_FILE = findFileFrom(ROOT_PATH, DEBUG_CLASS + ".java");
+
+		String[] submitFilePath = SUBMIT_FILE_NAME.split("/");
+		if (submitFilePath.length > 1) {
+			StringBuilder path = new StringBuilder();
+			path.append(findFilePathFrom(ROOT_PATH, submitFilePath[submitFilePath.length - 2]));
+			path.append(File.separator).append(submitFilePath[submitFilePath.length - 1]);
+			SUBMIT_FILE_NAME = path.toString();
+		} else if (submitFilePath.length == 1) {
+			SUBMIT_FILE_NAME = submitFilePath[submitFilePath.length - 1];
+		}
+	}
+
 	private void writeSubmitCode() {
-		if (AUTO_WRITE_SUBMIT_CODE) {
+		if (CREATE_SUBMIT_CODE) {
 			try {
 				File debugFile = new File(DEBUG_JAVA_FILE);
-				File submitCode = new File(AUTO_SUBMIT_FILE_NAME);
+				File submitFile = new File(SUBMIT_FILE_NAME);
 				BufferedWriter bw = new BufferedWriter(
-						new OutputStreamWriter(new FileOutputStream(submitCode), "utf-8"));
+						new OutputStreamWriter(new FileOutputStream(submitFile), "utf-8"));
 				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(debugFile), "utf-8"));
 				String s;
+				Pattern methodFrontRegex = Pattern.compile("(?i).*Debug.*\\(.*\\).*\\{?");
+				Pattern methodParamRegex = Pattern.compile("(?i).*\\(.*Debug.*\\).*\\{?");
 				boolean isCoordinateDebugger = false;
 				boolean removeGetRowGetCol = false;
 
 				while ((s = br.readLine()) != null) {
 					// 1. 클래스 이름 수정
 					if (s.contains(DEBUG_CLASS) && s.contains("class")) {
-						s = s.replace(DEBUG_CLASS, AUTO_SUBMIT_CLASS_NAME);
+						s = s.replace(DEBUG_CLASS, SUBMIT_CLASS_NAME);
 					}
 
 					// 2. 인터페이스 상속 확인 및 처리
@@ -109,12 +159,26 @@ public class DebugConfigure {
 							continue; // 메서드 블록을 건너뜀
 						}
 					}
+					
+					// "Debug" 관련 메서드 삭제: 메서드 선언부인지 확인
+					if (methodFrontRegex.matcher(s).matches() || methodParamRegex.matcher(s).matches()) {
+						int openBracesCount = 0;
+						boolean inDebugMethod = true;
+						while (inDebugMethod) {
+							openBracesCount += countChar(s, '{');
+							openBracesCount -= countChar(s, '}');
+							if (openBracesCount <= 0)
+								inDebugMethod = false;
+
+							if ((s = br.readLine()) == null)
+								break;
+						}
+					}
 
 					// 3. Debug 관련 라인 삭제
 					if (s.toUpperCase().contains("DEBUG")) {
-						if (!s.contains(";"))
-							while ((s = br.readLine()) != null && !s.contains(";"))
-								;
+						while (!s.contains(";") && (s = br.readLine()) != null)
+							;
 						continue; // Debug가 포함된 라인은 삭제
 					}
 
@@ -131,9 +195,19 @@ public class DebugConfigure {
 		}
 	}
 
+	private int countChar(String line, char character) {
+		int count = 0;
+		for (char ch : line.toCharArray()) {
+			if (ch == character) 
+				count++;
+		}
+		return count;
+	}
+
 	private void setUseInputFile() {
 		if (USE_INPUT_FILE) {
 			try {
+				INPUT_FILE = findFileFrom(ROOT_PATH, INPUT_FILE);
 				System.setIn(new FileInputStream(new File(INPUT_FILE)));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -149,7 +223,6 @@ public class DebugConfigure {
 
 			USE_INPUT_FILE = getProperty(p, "USE_INPUT_FILE", USE_INPUT_FILE);
 			INPUT_FILE = getProperty(p, "INPUT_FILE", INPUT_FILE);
-			INPUT_FILE = findFileFrom(ROOT_PATH, INPUT_FILE);
 
 			PRINT = getProperty(p, "PRINT", PRINT);
 			PRINT_WITH_HR = getBoolean(p.getProperty("PRINT_WITH_HR"));
@@ -161,22 +234,20 @@ public class DebugConfigure {
 
 			PRINT_WITH_INDEX = getProperty(p, "PRINT_WITH_INDEX", PRINT_WITH_INDEX);
 
-			AUTO_WRITE_SUBMIT_CODE = getProperty(p, "AUTO_WRITE_SUBMIT_CODE", AUTO_WRITE_SUBMIT_CODE);
-			AUTO_WRITE_JAVA_FILE = getProperty(p, "AUTO_WRITE_JAVA_FILE", AUTO_WRITE_JAVA_FILE);
+			CREATE_SUBMIT_CODE = getProperty(p, "CREATE_SUBMIT_CODE", CREATE_SUBMIT_CODE);
+			CREATE_JAVA_FILE = getProperty(p, "CREATE_JAVA_FILE", CREATE_JAVA_FILE);
 
-			AUTO_SUBMIT_CLASS_NAME = getProperty(p, "AUTO_SUBMIT_CLASS_NAME", AUTO_SUBMIT_CLASS_NAME);
-			AUTO_SUBMIT_FILE_NAME = getProperty(p, "AUTO_SUBMIT_FILE_NAME", AUTO_SUBMIT_FILE_NAME);
-			
-			if(AUTO_WRITE_JAVA_FILE)
-				AUTO_SUBMIT_FILE_NAME = AUTO_SUBMIT_CLASS_NAME+".java";
-			
-			AUTO_SUBMIT_FILE_NAME = ROOT_PATH + File.separator + AUTO_SUBMIT_FILE_NAME;
+			SUBMIT_CLASS_NAME = getProperty(p, "SUBMIT_CLASS_NAME", SUBMIT_CLASS_NAME);
+			SUBMIT_FILE_NAME = getProperty(p, "SUBMIT_FILE_NAME", SUBMIT_FILE_NAME);
 
-			DEBUG_JAVA_FILE = findFileFrom(ROOT_PATH, DEBUG_CLASS + ".java");
-			
-			String infoDetail = getProperty(p,"SHOW_INFO_DETAIL","SIMPLE");
+			if (CREATE_JAVA_FILE)
+				SUBMIT_FILE_NAME = SUBMIT_CLASS_NAME + ".java";
+
+			SUBMIT_FILE_NAME = ROOT_PATH + File.separator + SUBMIT_FILE_NAME;
+
+			String infoDetail = getProperty(p, "SHOW_INFO_DETAIL", "SIMPLE");
 			SHOW_INFO_DETAIL = getInfoDetail(infoDetail);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -233,13 +304,13 @@ public class DebugConfigure {
 	private int getProperty(Properties p, String find, int property) {
 		return p.getProperty(find) == null ? property : Integer.parseInt(p.getProperty(find).trim());
 	}
-	
+
 	private InfoDetail getInfoDetail(String detail) {
-		if(detail.equalsIgnoreCase("detail")) {
+		if (detail.equalsIgnoreCase("detail")) {
 			return InfoDetail.DETAIL;
-		}else if(detail.equalsIgnoreCase("simple")){
+		} else if (detail.equalsIgnoreCase("simple")) {
 			return InfoDetail.SIMPLE;
-		}else {
+		} else {
 			return InfoDetail.NONE;
 		}
 	}

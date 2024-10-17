@@ -1,5 +1,7 @@
 package javaPSdebugger.util;
 
+import java.util.Iterator;
+
 import javaPSdebugger.Debug;
 
 class CoordinateImpl implements CoordinateDebugger {
@@ -53,12 +55,31 @@ public class DebugPrint {
 		else
 			return " %" + maxDigit + "c ";
 	}
+	
+	private String getFormat(int maxDigit, Object object, boolean isChked) {
+		if (isChked)
+			return ">%" + maxDigit + "s<";
+		else
+			return " %" + maxDigit + "s ";
+	}
 
 	private String getIDXFormat(int maxDigit, int idx) {
 		return String.format("[%" + maxDigit + "d]", idx);
 	}
 
 	private int[] getDigitArr(int[][] arr, int rowSize, int colSize) {
+		int[] digitArr = new int[colSize];
+		for (int i = 0; i < rowSize; i++) {
+			for (int j = 0; j < colSize; j++) {
+				digitArr[j] = Math.max(digitArr[j], getDigit(arr[i][j]));
+				digitArr[j] = Math.max(digitArr[j], getDigit(j));
+			}
+		}
+
+		return digitArr;
+	}
+	
+	private int[] getDigitArr(Object[][] arr, int rowSize, int colSize) {
 		int[] digitArr = new int[colSize];
 		for (int i = 0; i < rowSize; i++) {
 			for (int j = 0; j < colSize; j++) {
@@ -90,6 +111,17 @@ public class DebugPrint {
 	}
 
 	private int[] getSize(char[][] arr, int rowSize, int colSize) {
+		rowSize = Math.min(rowSize, arr.length);
+
+		int maxColSize = 0;
+		for (int i = 0; i < arr.length; i++) {
+			maxColSize = Math.max(maxColSize, arr[i].length);
+		}
+		colSize = Math.min(maxColSize, colSize);
+		return new int[] { rowSize, colSize };
+	}
+	
+	private int[] getSize(Object[][] arr, int rowSize, int colSize) {
 		rowSize = Math.min(rowSize, arr.length);
 
 		int maxColSize = 0;
@@ -139,6 +171,26 @@ public class DebugPrint {
 
 		return ret.append('\n').toString();
 	}
+	
+	private String getColIdxString(Object[][] arr, int rowSize, int colSize) {
+		if (!Debug.config.PRINT_WITH_INDEX)
+			return "";
+		StringBuilder ret = new StringBuilder();
+		int[] size = getSize(arr, rowSize, colSize);
+		rowSize = size[0];
+		colSize = size[1];
+
+		int[] digitArr = getDigitArr(arr, rowSize, colSize);
+
+		int frontBlank = getDigit(rowSize - 1) + 2;
+		for (int i = 0; i < frontBlank; i++)
+			ret.append(' ');
+		for (int i = 0; i < colSize; i++) {
+			ret.append(getIDXFormat(digitArr[i], i));
+		}
+
+		return ret.append('\n').toString();
+	}
 
 	private int getDigit(int n) {
 		if (n == 0 || chkIgnore(n))
@@ -155,6 +207,10 @@ public class DebugPrint {
 		}
 		return ret;
 	}
+	
+	private int getDigit(Object n) {
+		return n.toString().length();
+	}
 
 	private int[] convertBooleanToIntArr(boolean[] array) {
 		int[] ret = new int[array.length];
@@ -170,6 +226,19 @@ public class DebugPrint {
 			arr[i] = convertBooleanToIntArr(array[i]);
 		}
 		return arr;
+	}
+	
+	private Object[][] convert2D(Object[] array, int start, int end) {
+		start = Math.max(start, 0);
+		end = Math.min(end, array.length);
+		if (start > end)
+			return new Object[0][0];
+
+		Object[][] newArray = new Object[1][end - start];
+		int cnt = 0;
+		for (int i = start; i < end; i++)
+			newArray[0][cnt++] = array[i];
+		return newArray;
 	}
 
 	private boolean[][] convert2D(boolean[] array, int start, int end) {
@@ -229,6 +298,50 @@ public class DebugPrint {
 		return convertCoordinateArr(new CoordinateImpl(row, col));
 	}
 
+	private CoordinateDebugger[] convertCoordinateArr(Iterable<? extends CoordinateDebugger> coordinates) {
+		int size = getIterableSize(coordinates);
+
+		CoordinateDebugger[] cors = new CoordinateDebugger[size];
+
+		int cnt = 0;
+		Iterator<? extends CoordinateDebugger> itor = coordinates.iterator();
+
+		while (itor.hasNext())
+			cors[cnt++] = itor.next();
+
+		return cors;
+	}
+
+	private CoordinateDebugger[] convertSingleDimensionCoordinateArr(int[] coordinates) {
+		CoordinateDebugger[] cors = new CoordinateDebugger[coordinates.length];
+		for (int i = 0; i < coordinates.length; i++)
+			cors[i] = new CoordinateImpl(0, coordinates[i]);
+		return cors;
+	}
+
+	private CoordinateDebugger[] convertSingleDimensionCoordinateArr(Iterable<Integer> coordinates) {
+		Iterator<Integer> itor;
+		int size = getIterableSize(coordinates);
+
+		CoordinateDebugger[] cors = new CoordinateDebugger[size];
+		int cnt = 0;
+		itor = coordinates.iterator();
+		while (itor.hasNext())
+			cors[cnt++] = new CoordinateImpl(0, itor.next());
+
+		return cors;
+	}
+
+	private int getIterableSize(Iterable<?> coordinates) {
+		Iterator<?> itor = coordinates.iterator();
+		int size = 0;
+		while (itor.hasNext()) {
+			size++;
+			itor.next();
+		}
+		return size;
+	}
+
 	/**
 	 * boolean 1차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
@@ -237,6 +350,26 @@ public class DebugPrint {
 	 */
 	public void arr(boolean[] array, int chkIdx, String... startText) {
 		arr(convert2D(array, 0, ALL), ALL, ALL, convertCoordinateArr(0, chkIdx), startText);
+	}
+
+	/**
+	 * boolean 1차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(boolean[] array, int[] chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * boolean 1차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(boolean[] array, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
 	}
 
 	/**
@@ -249,6 +382,30 @@ public class DebugPrint {
 	 */
 	public void arr(boolean[] array, int start, int end, int chkIdx, String... startText) {
 		arr(convert2D(array, start, end), ALL, ALL, convertCoordinateArr(0, chkIdx), startText);
+	}
+
+	/**
+	 * boolean 1차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(boolean[] array, int start, int end, int[] chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * boolean 1차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(boolean[] array, int start, int end, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
 	}
 
 	/**
@@ -275,6 +432,16 @@ public class DebugPrint {
 	 * boolean 2차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
 	 * @param array 출력할 배열
+	 * @param cor   출력을 대체할 위치 정보 클래스
+	 */
+	public void arr(boolean[][] array, CoordinateDebugger cor, String... startText) {
+		arr(array, ALL, ALL, convertCoordinateArr(cor), startText);
+	}
+
+	/**
+	 * boolean 2차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array 출력할 배열
 	 * @param cors  출력을 대체할 위치 정보 클래스 배열
 	 */
 	public void arr(boolean[][] array, CoordinateDebugger[] cors, String... startText) {
@@ -293,6 +460,19 @@ public class DebugPrint {
 	}
 
 	// boolean Impl
+
+	/**
+	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     출력을 대체할 위치 정보 클래스
+	 */
+	public void arr(boolean[][] array, int rowSize, int colSize, CoordinateDebugger cor, String... startText) {
+		arr(convertBooleanToIntArr(array), rowSize, colSize, cor, startText);
+	}
+
 	/**
 	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
@@ -329,6 +509,19 @@ public class DebugPrint {
 	}
 
 	/**
+	 * boolean 2차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cors    출력을 대체할 위치 정보 배열
+	 */
+	public void arr(boolean[][] array, int rowSize, int colSize, Iterable<? extends CoordinateDebugger> cors,
+			String... startText) {
+		arr(array, rowSize, colSize, convertCoordinateArr(cors), startText);
+	}
+
+	/**
 	 * boolean 2차원 배열의 일부분을 출력합니다. true는 1로, false는 0으로 출력합니다.
 	 *
 	 * @param array   출력할 배열
@@ -346,6 +539,16 @@ public class DebugPrint {
 	 * @param cors  출력을 대체할 위치 정보 배열
 	 */
 	public void arr(boolean[][] array, int[][] cors, String... startText) {
+		arr(array, ALL, ALL, convertCoordinateArr(cors), startText);
+	}
+
+	/**
+	 * boolean 2차원 배열의 전체를 출력합니다. true는 1로, false는 0으로 출력합니다.
+	 *
+	 * @param array 출력할 배열
+	 * @param cors  출력을 대체할 위치 정보 배열
+	 */
+	public void arr(boolean[][] array, Iterable<? extends CoordinateDebugger> cors, String... startText) {
 		arr(array, ALL, ALL, convertCoordinateArr(cors), startText);
 	}
 
@@ -369,6 +572,26 @@ public class DebugPrint {
 	}
 
 	/**
+	 * char 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(char[] array, int[] chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * char 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(char[] array, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
 	 * char 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
 	 *
 	 * @param array  출력할 배열
@@ -378,6 +601,30 @@ public class DebugPrint {
 	 */
 	public void arr(char[] array, int start, int end, int chkIdx, String... startText) {
 		arr(convert2D(array, start, end), ALL, ALL, convertCoordinateArr(0, chkIdx), startText);
+	}
+
+	/**
+	 * char 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(char[] array, int start, int end, int[] chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * char 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(char[] array, int start, int end, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
 	}
 
 	/**
@@ -422,6 +669,16 @@ public class DebugPrint {
 	}
 
 	/**
+	 * char 2차원 배열의 전체를 출력합니다. 특정위치의 값들을 chkChar로 대체하여 출력합니다.
+	 * 
+	 * @param array 출력할 배열
+	 * @param cors  특정 위치들이 담긴 클래스
+	 */
+	public void arr(char[][] array, Iterable<? extends CoordinateDebugger> cors, String... startText) {
+		arr(array, ALL, ALL, convertCoordinateArr(cors), startText);
+	}
+
+	/**
 	 * char 2차원 배열의 전체를 출력합니다. 특정위치의 값을 chkChar로 대체하여 출력합니다.
 	 * 
 	 * @param array 출력할 배열
@@ -442,6 +699,19 @@ public class DebugPrint {
 	 */
 	public void arr(char[][] array, int rowSize, int colSize, CoordinateDebugger cor, String... startText) {
 		arr(array, rowSize, colSize, convertCoordinateArr(cor), startText);
+	}
+
+	/**
+	 * char 2차원 배열의 일부분을 출력합니다. 특정위치의 값을 chkChar로 대체하여 출력합니다.
+	 * 
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cors    특정 위치가 담긴 클래스
+	 */
+	public void arr(char[][] array, int rowSize, int colSize, Iterable<? extends CoordinateDebugger> cors,
+			String... startText) {
+		arr(array, rowSize, colSize, convertCoordinateArr(cors), startText);
 	}
 
 	// char impl
@@ -558,6 +828,26 @@ public class DebugPrint {
 	}
 
 	/**
+	 * int 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(int[] array, int[] chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(int[] array, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
 	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
 	 *
 	 * @param array  출력할 배열
@@ -567,6 +857,30 @@ public class DebugPrint {
 	 */
 	public void arr(int[] array, int start, int end, int chkIdx, String... startText) {
 		arr(convert2D(array, start, end), ALL, ALL, convertCoordinateArr(0, chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(int[] array, int start, int end, int[] chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(int[] array, int start, int end, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
 	}
 
 	/**
@@ -603,13 +917,21 @@ public class DebugPrint {
 	/**
 	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
 	 *
-	 * @param array   출력할 배열
-	 * @param rowSize 출력할 행의 수
-	 * @param colSize 출력할 열의 수
-	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 * @param array 출력할 배열
+	 * @param cors  특정 위치 좌표가 포함된 클래스
 	 */
 	public void arr(int[][] array, CoordinateDebugger[] cors, String... startText) {
 		arr(array, ALL, ALL, cors, startText);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array 출력할 배열
+	 * @param cors  특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(int[][] array, Iterable<? extends CoordinateDebugger> cors, String... startText) {
+		arr(array, ALL, ALL, convertCoordinateArr(cors), startText);
 	}
 
 	/**
@@ -634,6 +956,18 @@ public class DebugPrint {
 	 * @param cor     특정 위치 좌표가 포함된 클래스
 	 */
 	public void arr(int[][] array, int rowSize, int colSize, CoordinateDebugger cor, String... startText) {
+		arr(array, rowSize, colSize, convertCoordinateArr(cor), startText);
+	}
+	
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(int[][] array, int rowSize, int colSize, Iterable<? extends CoordinateDebugger> cor, String... startText) {
 		arr(array, rowSize, colSize, convertCoordinateArr(cor), startText);
 	}
 
@@ -741,7 +1075,261 @@ public class DebugPrint {
 	public void arr(int[][] array, String... startText) {
 		arr(array, ALL, ALL, NONE_COOR, startText);
 	}
+/////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * int 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(Object[] array, int chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertCoordinateArr(0, chkIdx), startText);
+	}
 
+	/**
+	 * int 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(Object[] array, int[] chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 전체를 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(Object[] array, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(Object[] array, int start, int end, int chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertCoordinateArr(0, chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(Object[] array, int start, int end, int[] chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 일부분을 출력합니다. 특정 위치의 값을 chkChar로 대체하여 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param chkIdx 출력을 대체할 위치
+	 */
+	public void arr(Object[] array, int start, int end, Iterable<Integer> chkIdx, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, convertSingleDimensionCoordinateArr(chkIdx), startText);
+	}
+
+	/**
+	 * int 1차원 배열의 일부분을 출력합니다. ignore 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param start  출력을 시작할 위치
+	 * @param end    출력을 종료할 위치 (exclusive)
+	 * @param ignore 무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
+	 */
+	public void arr(Object[] array, int start, int end, String... startText) {
+		arr(convert2D(array, start, end), ALL, ALL, NONE_COOR, startText);
+	}
+
+	/**
+	 * int 1차원 배열을 출력합니다.
+	 *
+	 * @param array 출력할 배열
+	 */
+	public void arr(Object[] array, String... startText) {
+		arr(convert2D(array, 0, ALL), ALL, ALL, NONE_COOR, startText);
+	}
+
+	/**
+	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array 출력할 배열
+	 * @param cor   특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(Object[][] array, CoordinateDebugger cor, String... startText) {
+		arr(array, ALL, ALL, convertCoordinateArr(cor), startText);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array 출력할 배열
+	 * @param cors  특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(Object[][] array, CoordinateDebugger[] cors, String... startText) {
+		arr(array, ALL, ALL, cors, startText);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array 출력할 배열
+	 * @param cors  특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(Object[][] array, Iterable<? extends CoordinateDebugger> cors, String... startText) {
+		arr(array, ALL, ALL, convertCoordinateArr(cors), startText);
+	}
+
+	/**
+	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
+	 * DEFAULT_IGNORE_CHAR로 출력합니다.
+	 *
+	 * @param array  출력할 배열
+	 * @param row    문자를 대체할 행 인덱스
+	 * @param col    문자를 대체할 열 인덱스
+	 * @param ignore 무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
+	 */
+	public void arr(Object[][] array, int[] cor, String... startText) {
+		arr(array, ALL, ALL, convertCoordinateArr(cor[0], cor[1]), startText);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(Object[][] array, int rowSize, int colSize, CoordinateDebugger cor, String... startText) {
+		arr(array, rowSize, colSize, convertCoordinateArr(cor), startText);
+	}
+	
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(Object[][] array, int rowSize, int colSize, Iterable<? extends CoordinateDebugger> cor, String... startText) {
+		arr(array, rowSize, colSize, convertCoordinateArr(cor), startText);
+	}
+
+	// int Impl
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param cor     특정 위치 좌표가 포함된 클래스
+	 */
+	public void arr(Object[][] array, int rowSize, int colSize, CoordinateDebugger[] cors, String... startText) {
+		if (!Debug.config.PRINT)
+			return;
+
+		printStartText(startText);
+		StringBuilder sb = new StringBuilder();
+
+		int[] size = getSize(array, rowSize, colSize);
+		rowSize = size[0];
+		colSize = size[1];
+		int[] digitArr = getDigitArr(array, rowSize, colSize);
+
+		int rowMaxDigit = getDigit(rowSize - 1);
+		sb.append(getColIdxString(array, rowSize, colSize));
+		for (int i = 0; i < rowSize; i++) {
+			if (Debug.config.PRINT_WITH_INDEX)
+				sb.append(getIDXFormat(rowMaxDigit, i));
+			int newColSize = Math.min(colSize, array[i].length);
+
+			for (int j = 0; j < newColSize; j++) {
+				boolean flag = false;
+				for (int k = 0; k < cors.length && cors[k] != null; k++) {
+					CoordinateDebugger cor = cors[k];
+					if (i == cor.getRow() && j == cor.getCol()) {
+						flag = true;
+						break;
+					}
+				}
+
+				sb.append(String.format(getFormat(digitArr[j], array[i][j], flag), array[i][j].toString()));
+			}
+			sb.append('\n');
+		}
+		System.out.println(sb);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param row     문자를 대체할 행 인덱스
+	 * @param col     문자를 대체할 열 인덱스
+	 */
+	public void arr(Object[][] array, int rowSize, int colSize, int[] cor, String... startText) {
+		arr(array, rowSize, colSize, convertCoordinateArr(cor[0], cor[1]), startText);
+	}
+
+	/**
+	 * int 2차원 배열의 일부분을 출력합니다. 지정된 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력합니다.
+	 *
+	 * @param array   출력할 배열
+	 * @param rowSize 출력할 행의 수
+	 * @param colSize 출력할 열의 수
+	 * @param ignore  무시할 값. 이 값과 같은 경우 DEFAULT_IGNORE_CHAR로 출력됩니다.
+	 */
+	public void arr(Object[][] array, int rowSize, int colSize, String... startText) {
+		arr(array, rowSize, colSize, NONE_COOR, startText);
+	}
+
+	/**
+	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
+	 * DEFAULT_IGNORE_CHAR로 출력합니다.
+	 *
+	 * @param array       출력할 배열
+	 * @param coordinates 대체할 문자가 담긴 int배열 [idx][row=0, col=1] 형태로만 가능합니다.
+	 */
+	public void arr(Object[][] array, int rowSize, int colSize, int[][] coordinates, String... startText) {
+		arr(array, rowSize, colSize, convertCoordinateArr(coordinates), startText);
+	}
+
+	/**
+	 * int 2차원 배열을 출력합니다. 특정 위치에 있는 값을 지정된 문자로 대체하여 출력하고, 지정된 값과 같은 경우
+	 * DEFAULT_IGNORE_CHAR로 출력합니다.
+	 *
+	 * @param array       출력할 배열
+	 * @param coordinates 대체할 문자가 담긴 int배열 [idx][row=0, col=1] 형태로만 가능합니다.
+	 */
+	public void arr(Object[][] array, int[][] coordinates, String... startText) {
+		arr(array, convertCoordinateArr(coordinates), startText);
+	}
+
+	/**
+	 * int 2차원 배열을 출력합니다. 디버그 모드가 활성화된 경우에만 배열을 출력합니다.
+	 *
+	 * @param array 출력할 배열
+	 */
+	public void arr(Object[][] array, String... startText) {
+		arr(array, ALL, ALL, NONE_COOR, startText);
+	}
 	/**
 	 * 구분선을 출력합니다.
 	 */
@@ -798,22 +1386,22 @@ public class DebugPrint {
 		System.out.println("현재 클래스 : " + Debug.config.DEBUG_CLASS);
 		System.out.println("현재 파일 : " + Debug.config.DEBUG_JAVA_FILE);
 		System.out.println("PRINT : " + Debug.config.PRINT);
-		
+
 		System.out.println("USE_INPUT_FILE : " + Debug.config.USE_INPUT_FILE);
 		if (Debug.config.USE_INPUT_FILE)
 			System.out.println("\tINPUT_FILE : " + Debug.config.INPUT_FILE);
 
-		System.out.println("AUTO_WRITE_SUBMIT_CODE : " + Debug.config.AUTO_WRITE_SUBMIT_CODE);
+		System.out.println("CREATE_SUBMIT_CODE : " + Debug.config.CREATE_SUBMIT_CODE);
 
-		if (Debug.config.AUTO_WRITE_SUBMIT_CODE) {
-			System.out.println("\tAUTO_SUBMIT_CLASS_NAME : " + Debug.config.AUTO_SUBMIT_CLASS_NAME);
-			if (!Debug.config.AUTO_WRITE_JAVA_FILE)
-				System.out.println("\tAUTO_SUBMIT_FILE_NAME : " + Debug.config.AUTO_SUBMIT_FILE_NAME);
+		if (Debug.config.CREATE_SUBMIT_CODE) {
+			System.out.println("\tSUBMIT_CLASS_NAME : " + Debug.config.SUBMIT_CLASS_NAME);
+			if (!Debug.config.CREATE_JAVA_FILE)
+				System.out.println("\tSUBMIT_FILE_NAME : " + Debug.config.SUBMIT_FILE_NAME);
 		}
 		hrForce();
 	}
 
-	public void detailInfo() {		
+	public void detailInfo() {
 		System.out.println("현재 프로젝트 경로 : " + Debug.config.ROOT_PATH);
 		System.out.println("Debug.java 경로 : " + Debug.config.DEBUG_PACKAGE_PATH);
 		System.out.println("현재 클래스 : " + Debug.config.DEBUG_CLASS);
@@ -823,13 +1411,13 @@ public class DebugPrint {
 		if (Debug.config.USE_INPUT_FILE)
 			System.out.println("\tINPUT_FILE : " + Debug.config.INPUT_FILE);
 
-		System.out.println("AUTO_WRITE_SUBMIT_CODE : " + Debug.config.AUTO_WRITE_SUBMIT_CODE);
+		System.out.println("CREATE_SUBMIT_CODE : " + Debug.config.CREATE_SUBMIT_CODE);
 
-		if (Debug.config.AUTO_WRITE_SUBMIT_CODE) {
-			System.out.println("\tAUTO_SUBMIT_CLASS_NAME : " + Debug.config.AUTO_SUBMIT_CLASS_NAME);
-			System.out.println("\tAUTO_WRITE_JAVA_FILE : " + Debug.config.AUTO_WRITE_JAVA_FILE);
-			if (!Debug.config.AUTO_WRITE_JAVA_FILE)
-				System.out.println("\tAUTO_SUBMIT_FILE_NAME : " + Debug.config.AUTO_SUBMIT_FILE_NAME);
+		if (Debug.config.CREATE_SUBMIT_CODE) {
+			System.out.println("\tSUBMIT_CLASS_NAME : " + Debug.config.SUBMIT_CLASS_NAME);
+			System.out.println("\tCREATE_JAVA_FILE : " + Debug.config.CREATE_JAVA_FILE);
+			if (!Debug.config.CREATE_JAVA_FILE)
+				System.out.println("\tSUBMIT_FILE_NAME : " + Debug.config.SUBMIT_FILE_NAME);
 		}
 
 		System.out.println("IGNORE_MIN_MAX_VAL : " + Debug.config.IGNORE_MIN_MAX_VAL);
@@ -837,9 +1425,9 @@ public class DebugPrint {
 			System.out.println("\tIGNORE_CHAR : " + Debug.config.IGNORE_CHAR);
 
 		System.out.println("PRINT_WITH_HR : " + Debug.config.PRINT_WITH_HR);
-		if(Debug.config.PRINT_WITH_HR)
+		if (Debug.config.PRINT_WITH_HR)
 			System.out.println("\tDEFAULT_HR_CHAR : " + Debug.config.DEFAULT_HR_CHAR);
-			System.out.println("\tDEFAULT_HR_CNT : " + Debug.config.DEFAULT_HR_CNT);
+		System.out.println("\tDEFAULT_HR_CNT : " + Debug.config.DEFAULT_HR_CNT);
 		hrForce();
 	}
 

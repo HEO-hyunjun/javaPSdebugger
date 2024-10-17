@@ -55,7 +55,7 @@ readme 폴더의 [example.java](./readme/example.java) 파일을 참고해주세
 ## 주요 기능
 
 - print : 출력과 관련된 기능
-  - arr : 1차원, 2차원 int,boolean, char배열을 출력합니다. 출력할 크기, 강조할 위치, 같이 출력할 문구를 옵션으로 넣을 수 있습니다.
+  - arr : 1차원, 2차원 int, boolean, char, Object 배열을 출력합니다. 출력할 크기, 강조할 위치, 같이 출력할 문구를 옵션으로 넣을 수 있습니다.
   - hr : 구분선을 출력합니다.
 - config : 출력, input파일 사용 여부 등 다양한 옵션과 관련된 설정 변수들이 저장돼있습니다.
 - timer : 코드 실행시간,메모리를 측정하는 기능이 들어있습니다.
@@ -67,6 +67,12 @@ readme 폴더의 [example.java](./readme/example.java) 파일을 참고해주세
 - main()메소드 **가장 첫부분에서** `Debug.start(Object)`함수를 호출해줍니다.
   - 매개변수로는 `main()`함수가 구동되는 클래스의 인스턴스를 넣어줍니다.
   - ex 문제풀이 중인 클래스의 이름이 `test`라면, `Debug.start(new test());`를 main문 시작부분에 작성합니다.
+- 자동 제출 코드는
+  1.  CoordinateDebugger 상속을 제거
+  2.  Debug가 포함된 문자열을 찾으면
+      2-1. Debug가 메소드나 파라미터에 들어있다면 삭제합니다.
+      2-2. 혹은 ;가 나올때까지 삭제합니다.
+  - 따라서 **항상 완벽하게 제거가 되지 않을수 있으니** 주의바랍니다.
 
 ## Config.ini 설정
 
