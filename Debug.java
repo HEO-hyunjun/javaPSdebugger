@@ -1,6 +1,7 @@
 package javaPSdebugger;
 
 import java.io.*;
+import java.util.Scanner;
 
 import javaPSdebugger.util.DebugConfigure;
 import javaPSdebugger.util.DebugPrint;
@@ -19,8 +20,10 @@ public class Debug {
 	public static DebugTimer timer;
 
 	private static Debug instance = new Debug();
+	private static Scanner sc;
 
 	private Debug() {
+		sc = new Scanner(System.in);
 		System.out.println("Debug 모듈이 import됐습니다.");
 	}
 
@@ -60,5 +63,14 @@ public class Debug {
 	public static void breakPoint() {
 		System.out.print("");
 	}
-
+	
+	/**
+	 * 입력을 기다리며 멈출수 있습니다.
+	 * debug모드 사용하지 않고 사용할 수 있는 브레이크포인트입니다.
+	 * 입력이 꼬이지 않게 주의 바랍니다.
+	 */
+	public static void stop() {
+		System.out.print("진행하려면 enter를 눌러주세요 ... ");
+		sc.nextLine();
+	}
 }
