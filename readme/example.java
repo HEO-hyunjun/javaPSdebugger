@@ -63,17 +63,18 @@ public class example {
 		int cnt = 1;
 		while (!q.isEmpty()) {
 			int size = q.size();
-			for (int step = 0; step < size; step++) {
+			for (int i = 0; i < size; i++) {
 				Point now = q.poll();
-				for (int i = 0; i < 4; i++) {
+				for (int dir = 0; dir < 4; dir++) {
 					Point next = new Point(now);
-					next.r += dr[i];
-					next.c += dc[i];
+					next.r += dr[dir];
+					next.c += dc[dir];
 					if (isRange(next) && visit[next.r][next.c] == 0) {
 						visit[next.r][next.c] = cnt;
 						q.add(next);
 					}
-					Debug.print.arr(visit, new Point[] { now, next }, "now = " + now, "next = " + next);
+					Debug.print.arr(visit, new Point[] { now, next }, "now = " + now, "next = " + next); // arr(배열, 좌표클래스, 문자열들)
+//					Debug.print.arr(visit, new int[][] {{now.r,now.c},{next.r,next.c}}, "now = " + now, "next = " + next); // arr(배열, int[]{행, 열} 좌표, 문자열들)
 					Debug.breakPoint();
 				}
 			}
@@ -94,7 +95,11 @@ public class example {
 		visit = new int[N][M];
 
 		bfs(new Point(0, 0));
+//		Debug.print.arr(visit); // arr(배열)
 		Debug.print.arr(visit, "after bfs visit");
+		int rowSize = 2;
+		int colSize = 3;
+//		Debug.print.arr(visit, rowSize, colSize, "after bfs visit"); // arr(배열, 출력할 행 크기, 출력할 열 크기, 출력할 문자열)
 		System.out.println("ans = " + getMax());
 		Debug.timer.chk();
 	}
