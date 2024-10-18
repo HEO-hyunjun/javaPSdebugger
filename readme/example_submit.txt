@@ -20,6 +20,7 @@ class Point {
 		this.c = c;
 	}
 
+	@Override
 	public String toString() {
 		return "Point [r=" + r + ", c=" + c + "]";
 	}

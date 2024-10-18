@@ -75,12 +75,12 @@ public class example {
 						visit[next.r][next.c] = cnt;
 						q.add(next);
 					}
-					// Debug.print.arr(배열, 좌표클래스, 문자열들)
+					// Debug.print.arr(배열, 좌표클래스, 문자열들);
 //					Debug.print.arr(visit, new Point[] { now, next }, "now = " + now, "next = " + next); 
-					// Debug.print.arr(배열, Iterable<좌표클래스>, 문자열들)
+					// Debug.print.arr(배열, Iterable<좌표클래스>, 문자열들);
 //					Debug.print("queue",q); // 단순출력
 //					Debug.print.arr(visit, q, "now = " + now, "next = " + next); 
-					// Debug.print.arr(배열, int[]{행, 열} 좌표, 문자열들)
+					// Debug.print.arr(배열, int[]{행, 열} 좌표, 문자열들);
 //					Debug.print.arr(visit, new int[][] {{now.r,now.c},{next.r,next.c}}, "now = " + now, "next = " + next); 
 					Debug.breakPoint();
 				}
@@ -123,7 +123,7 @@ public class example {
 		//Debug.print.arr(배열, 출력할 문자열)
 		Debug.print.arr(visit, "after bfs visit");
 		
-		// Debug.print.arr(배열, 출력할 행 크기, 출력할 열 크기, 출력할 문자열)
+		// Debug.print.arr(배열, 출력할 행 크기, 출력할 열 크기, 출력할 문자열);
 //		int rowSize = 2;
 //		int colSize = 3;
 //		Debug.print.arr(visit, rowSize, colSize, "after bfs visit"); 

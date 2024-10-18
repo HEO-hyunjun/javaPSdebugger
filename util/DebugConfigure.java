@@ -103,8 +103,8 @@ public class DebugConfigure {
 						new OutputStreamWriter(new FileOutputStream(submitFile), "utf-8"));
 				BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(debugFile), "utf-8"));
 				String s;
-				Pattern methodFrontRegex = Pattern.compile("(?i).*Debug.*\\(.*\\).*\\{?");
-				Pattern methodParamRegex = Pattern.compile("(?i).*\\(.*Debug.*\\).*\\{?");
+				Pattern methodRegex = Pattern.compile(
+						"(?i)(?:(?:public|private|protected|static|final|native|synchronized|abstract|transient)\\s+)*(?:\\w+\\s+)*\\w*(?:debug)\\w*\\s+\\w+\\s*\\([^)]*\\)");
 				boolean isCoordinateDebugger = false;
 				boolean removeGetRowGetCol = false;
 
@@ -148,31 +148,35 @@ public class DebugConfigure {
 						s += " {";
 					}
 
-					// 2-1, 2-2. getCol(), getRow(), @Override 삭제
+					// 2-1, 2-2. getCol(), getRow()의 @Override 삭제
 					if (removeGetRowGetCol) {
-						if (s.contains("@Override")) {
-							continue; // @Override 애노테이션 삭제
+						if (s.trim().equals("@Override")) {
+							String nextLine = br.readLine();
+							if (nextLine != null && (nextLine.contains("getRow()") || nextLine.contains("getCol()"))) {
+								s = nextLine; // @Override 애노테이션 삭제
+							} else {
+								bw.write(s + '\n'); // 다른 메서드의 @Override는 유지
+								s = nextLine; // 다음 줄 처리를 위해 s 업데이트
+							}
 						}
 						if (s.contains("getRow()") || s.contains("getCol()")) {
-							while (!(s = br.readLine()).contains("}"))
-								;
+							int openBracesCount = 1;
+							while (openBracesCount > 0 && (s = br.readLine()) != null) {
+								openBracesCount += countChar(s, '{');
+								openBracesCount -= countChar(s, '}');
+							}
 							continue; // 메서드 블록을 건너뜀
 						}
 					}
-					
+
 					// "Debug" 관련 메서드 삭제: 메서드 선언부인지 확인
-					if (methodFrontRegex.matcher(s).matches() || methodParamRegex.matcher(s).matches()) {
-						int openBracesCount = 0;
-						boolean inDebugMethod = true;
-						while (inDebugMethod) {
+					if (methodRegex.matcher(s).find()) {
+						int openBracesCount = 1;
+						while (openBracesCount > 0 && (s = br.readLine()) != null) {
 							openBracesCount += countChar(s, '{');
 							openBracesCount -= countChar(s, '}');
-							if (openBracesCount <= 0)
-								inDebugMethod = false;
-
-							if ((s = br.readLine()) == null)
-								break;
 						}
+						continue; // Debug 메서드 전체를 건너뜀
 					}
 
 					// 3. Debug 관련 라인 삭제
@@ -198,7 +202,7 @@ public class DebugConfigure {
 	private int countChar(String line, char character) {
 		int count = 0;
 		for (char ch : line.toCharArray()) {
-			if (ch == character) 
+			if (ch == character)
 				count++;
 		}
 		return count;
