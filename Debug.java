@@ -24,7 +24,6 @@ public class Debug {
 
 	private Debug() {
 		sc = new Scanner(System.in);
-		System.out.println("Debug 모듈이 import됐습니다.");
 	}
 
 	/**
@@ -71,18 +70,20 @@ public class Debug {
 	}
 
 	private static void init() {
-		if (config.CREATE_SUBMIT_CODE) {
-			System.out.printf("자동 제출코드(%s)가 생성됐으니,\n", config.SUBMIT_CLASS_NAME);
-			System.out.println("그 파일을 그대로 복사해서 제출해주세요.");
-		} else {
-			System.out.println("^.*(Debug).*");
-			System.out.println("find and replace(ctrl+F)로 위 정규식을 입력후,");
-			System.out.println("공백으로 변환하고 최종확인 후 제출해주세요.");
-		}
+	    System.out.println(" ____     ____         __              __                                                    \r\n" + 
+	    		"/\\  _`\\  /\\  _`\\      /\\ \\            /\\ \\                                                   \r\n" + 
+	    		"\\ \\ \\L\\ \\\\ \\,\\L\\_\\    \\_\\ \\      __   \\ \\ \\____   __  __     __        __        __    _ __  \r\n" + 
+	    		" \\ \\ ,__/ \\/_\\__ \\    /'_` \\   /'__`\\  \\ \\ '__`\\ /\\ \\/\\ \\  /'_ `\\    /'_ `\\    /'__`\\ /\\`'__\\\r\n" + 
+	    		"  \\ \\ \\/    /\\ \\L\\ \\ /\\ \\L\\ \\ /\\  __/   \\ \\ \\L\\ \\\\ \\ \\_\\ \\/\\ \\L\\ \\  /\\ \\L\\ \\  /\\  __/ \\ \\ \\/ \r\n" + 
+	    		"   \\ \\_\\    \\ `\\____\\\\ \\___,_\\\\ \\____\\   \\ \\_,__/ \\ \\____/\\ \\____ \\ \\ \\____ \\ \\ \\____\\ \\ \\_\\ \r\n" + 
+	    		"    \\/_/     \\/_____/ \\/__,_ / \\/____/    \\/___/   \\/___/  \\/___L\\ \\ \\/___L\\ \\ \\/____/  \\/_/ \r\n" + 
+	    		"                                                             /\\____/   /\\____/               \r\n" + 
+	    		"                                                             \\_/__/    \\_/__/                ");
 
-		print = new DebugPrint();
-		timer = new DebugTimer();
+	    print = new DebugPrint();
+	    timer = new DebugTimer();
 	}
+
 
 	/**
 	 * 아무 기능도 없지만, debug 모드에서 사용할 수 있는 브레이크포인트 함수입니다.
