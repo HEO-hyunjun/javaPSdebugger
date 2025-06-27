@@ -180,7 +180,7 @@ public class DebugConfigure {
 					}
 
 					// 3. Debug 관련 라인 삭제
-					if (s.toUpperCase().contains("DEBUG")) {
+					if (s.toUpperCase().contains("DEBUG") && s.toUpperCase().contains("PACKAGE")) {
 						while (!s.contains(";") && (s = br.readLine()) != null)
 							;
 						continue; // Debug가 포함된 라인은 삭제
